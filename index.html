@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Statistics</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="text/javascript" src="script.js"></script>
+  </head>
+  <body>
+    <h3>Data Definintion</h3>
+    <div id="valueform">
+    <form id="values">
+      <table>
+	<tr>
+	  <td>
+	    <label for="distribution">
+	      Distribution:
+	    </label>
+	  </td>
+	  <td>
+	    <select name="distribution">
+	      <option value="gaussian">Gaussian (Normal)</option>
+	      <option value="uniform">Uniform</option>
+	    </select>
+	</tr>
+	<tr>
+	  <td>
+	    <label for="number">
+	      Number of points:
+	    </label>
+	  </td>
+	  <td>
+	    <input type="text" name="number" id="number" value="20">
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <label for="mean">
+	      Distribution mean:
+	    </label>
+	  </td>
+	  <td>
+	    <input type="text" name="mean" id="mean" value="20">
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <label for="stddev">
+	      Standard deviation:
+	    </label>
+	  </td>
+	  <td>
+	    <input type="text" name="stddev" id="stddev" value="5">
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <label for="classw">
+	      Class interval width:
+	    </label>
+	  </td>
+	  <td>
+	    <input type="text" name="classw" id="classw" value="10">
+	  </td>
+	</tr>
+      </table>
+    </form>
+    </div>
+    <h3>Histogram</h3>
+    <canvas id="canvas"></canvas>
+    <div>
+    <table id="readings">
+      <tr>
+	<td>
+	  Mark:
+	</td>
+	<td>
+	  <span id="mark"></span>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  Points below mark:
+	</td>
+	<td>
+	  <span id="below"></span>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  Approximate points below mark:
+	</td>
+	<td>
+	  <span id="abelow"></span>
+	</td>
+      </tr>
+    </table>
+    </div>
+    <h3>Raw Data</h3>
+    <div id="data">
+    </div>
+    <h3>Frequency Table</h3>
+    <table id="freq">
+      <thead>
+	<tr>
+	  <th colspan='2'>
+	    Class Interval
+	  </th>
+	  <th>
+	    Frequency
+	  </th>
+	</tr>
+      </thead>
+      <tbody id="freqrows">
+      </tbody>
+    </table>
+    <script type="text/javascript">
+      setTimeout(init(),500);
+    </script>
+  </body>
+</html>
