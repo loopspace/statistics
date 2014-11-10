@@ -145,7 +145,7 @@ function getValues () {
 	}
     );
     sdata = data.slice(0);
-    sdata.sort();
+    sdata.sort(compareNumbers);
     bins = [];
     below = 0;
     abelow = 0;
@@ -216,7 +216,7 @@ function getValues () {
     tbl.replaceChild(tblbdy,document.querySelector('#freqrows'));
     tblbdy.id = 'freqrows';
     var sdata = data.map(function(v) {return Math.floor(v+.5)});
-    sdata.sort();
+    sdata.sort(compareNumbers);
     tbl = document.querySelector("#stem");
     tblbdy = document.createElement('tbody');
     var stem = -10;
@@ -448,7 +448,7 @@ function stddev(d) {
 function median (d) {
     var n = d.length;
     var sd = d.slice(0);
-    sd.sort();
+    sd.sort(compareNumbers);
     if (n%2 == 0) {
 	return (sd[n/2-1] + sd[n/2])/2;
     } else {
@@ -459,7 +459,7 @@ function median (d) {
 function lowerquartile (d) {
     var n = d.length;
     var sd = d.slice(0);
-    sd.sort();
+    sd.sort(compareNumbers);
     if (n%4 == 0) {
 	return (sd[n/4-1] + sd[n/4])/2;
     } else {
@@ -470,7 +470,7 @@ function lowerquartile (d) {
 function upperquartile (d) {
     var n = d.length;
     var sd = d.slice(0);
-    sd.sort();
+    sd.sort(compareNumbers);
     if (n%4 == 0) {
 	return (sd[3*n/4-1] + sd[3*n/4])/2;
     } else {
@@ -572,3 +572,7 @@ function binupperquartile (b) {
 	}
 
 })();
+
+function compareNumbers(a,b) {
+    return a - b;
+}
