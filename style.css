@@ -2,3 +2,34 @@
     width: 50%;
     display: inline;
 }
+
+#freq td:first-child {
+    text-align: right;
+}
+
+#freq td:nth-child(3) {
+    text-align: right;
+    padding-right: 40px;
+}
+
+#freq th:first-child {
+    padding-right: 10px;
+}
+
+#stem th:first-child {
+    padding-right: 10px;
+}
+
+#stem td:first-child {
+    text-align: right;
+    padding-right: 10px;
+}
+
+#stem th {
+    text-align: left;
+}
+
+table.text td:first-child {
+    text-align: right;
+    padding-right: 5px;
+}

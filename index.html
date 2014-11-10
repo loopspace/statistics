@@ -7,10 +7,10 @@
     <script type="text/javascript" src="script.js"></script>
   </head>
   <body>
-    <h3>Data Definintion</h3>
     <div id="valueform">
     <form id="values">
-      <table>
+    <h3>Data Definintion</h3>
+      <table class="text">
 	<tr>
 	  <td>
 	    <label for="distribution">
@@ -20,6 +20,7 @@
 	  <td>
 	    <select name="distribution">
 	      <option value="gaussian">Gaussian (Normal)</option>
+	      <option value="exponential">Exponential</option>
 	      <option value="uniform">Uniform</option>
 	    </select>
 	</tr>
@@ -55,6 +56,19 @@
 	</tr>
 	<tr>
 	  <td>
+	    <label for="edata">
+	      Extra data points:
+	    </label>
+	  </td>
+	  <td>
+	    <input type="text" name="edata" id="edata" value="">
+	  </td>
+	</tr>
+      </table>
+      <h3>Data Representation</h3>
+      <table class="text">
+	<tr>
+	  <td>
 	    <label for="classw">
 	      Class interval width:
 	    </label>
@@ -63,13 +77,61 @@
 	    <input type="text" name="classw" id="classw" value="10">
 	  </td>
 	</tr>
+	<tr>
+	  <td>
+	    <label for="radius">
+	      Point radius:
+	    </label>
+	  </td>
+	  <td>
+	    <input type="text" name="radius" id="radius" value="2">
+	  </td>
+	</tr>
       </table>
     </form>
     </div>
+    <h3>Raw Data</h3>
+    <div id="data">
+    </div>
+    <h3>Sorted Raw Data</h3>
+    <div id="sdata">
+    </div>
+    <h3>Frequency Table</h3>
+    <table id="freq">
+      <thead>
+	<tr>
+	  <th colspan='2'>
+	    Class Interval
+	  </th>
+	  <th>
+	    Frequency
+	  </th>
+	</tr>
+      </thead>
+      <tbody id="freqrows">
+      </tbody>
+    </table>
+    <h3>Stem and Leaf Diagram</h3>
+    <p>
+      (Data rounded to nearest whole number.)
+    </p>
+    <table id="stem">
+      <thead>
+	<tr>
+	  <th>
+	    Stem
+	  </th>
+	  <th>
+	    Leaf
+	  </th>
+	</tr>
+	<tbody id="stemrows">
+	</tbody>
+    </table>
     <h3>Histogram</h3>
-    <canvas id="canvas"></canvas>
+    <canvas id="histogram"></canvas>
     <div>
-    <table id="readings">
+    <table id="readings" class="text">
       <tr>
 	<td>
 	  Mark:
@@ -96,23 +158,87 @@
       </tr>
     </table>
     </div>
-    <h3>Raw Data</h3>
-    <div id="data">
-    </div>
-    <h3>Frequency Table</h3>
-    <table id="freq">
-      <thead>
-	<tr>
-	  <th colspan='2'>
-	    Class Interval
-	  </th>
-	  <th>
-	    Frequency
-	  </th>
-	</tr>
-      </thead>
-      <tbody id="freqrows">
-      </tbody>
+    <h3>Boxplot</h3>
+    <canvas id="boxplot"></canvas>
+    <h3>Sample Statistics</h3>
+    <table id="stats" class="text">
+      <tr>
+	<td>
+	  Mean:
+	</td>
+	<td id="smean">
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  Median:
+	</td>
+	<td id="smedian">
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  Modal class:
+	</td>
+	<td id="smode">
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  Variance:
+	</td>
+	<td id="svariance">
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  Standard Deviation:
+	</td>
+	<td id="sstddev">
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  Lower Quartile:
+	</td>
+	<td id="slowq">
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  Upper Quartile:
+	</td>
+	<td id="supq">
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  Inter-Quartile Range:
+	</td>
+	<td id="siqrange">
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  Lower Quartile Estimate:
+	</td>
+	<td id="sblowq">
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  Upper Quartile Estimate:
+	</td>
+	<td id="sbupq">
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  Inter-Quartile Range Estimate:
+	</td>
+	<td id="sbiqrange">
+	</td>
+      </tr>
     </table>
     <script type="text/javascript">
       setTimeout(init(),500);
