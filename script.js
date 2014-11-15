@@ -9,19 +9,16 @@ var data = [];
 var edata = [];
 var sdata = [];
 var scale = 10;
-var border;
+var border = 20;
 var width;
 var height;
-var fwidth;
-var fheight;
 var bwidth = 10;
 var bheight = 10;
 var gwidth;
-var gheight;
-var txtWidth;
 var bins;
 var hbin;
 var nbins;
+var offset;
 var pos = 50;
 var below;
 var mouseClicked;
@@ -47,6 +44,15 @@ function init() {
 	if (element.type === "select-one")
     	    element.onchange = getValues;
     }
+
+    var button = document.querySelector("#reset");
+    button.onclick = function() {getValues(true)};
+    
+    elts = document.getElementsByClassName('arrow');
+    for (var i=0, element; element = elts[i++];) {
+	element.onclick = toggle_div;
+    }
+    
     setSize();
     getValues();
 }
@@ -90,9 +96,9 @@ distributions = [
 ];
 
 
-function getValues () {
+function getValues (redo) {
     var elts = form.elements;
-    var redo = false;
+    var redo = redo || false;
     var x;
     var ndarr = [];
     for (var i=0, element; element = elts[i++];) {
@@ -126,6 +132,7 @@ function getValues () {
 	}
     }
     if (redo) {
+	// Regenerate random data
 	data = [];
 	for (var i=0;i<values.number;i++) {
 	    data.push(distribution(values.mean,values.stddev));
@@ -144,24 +151,37 @@ function getValues () {
 	    edata.push(d);
 	}
     );
+    // sort the data
     sdata = data.slice(0);
     sdata.sort(compareNumbers);
+    offset = Math.floor((Math.min(0,sdata[0]) - values.classb)/values.classw)*values.classw + values.classb;
     bins = [];
     below = 0;
     abelow = 0;
-    nbins = Math.ceil(100/values.classw);
-    //    for (var i = 0; i < data.length; i++) {
+    nbins = 0;
+
     data.forEach( function(y) {
-	bins[Math.floor(y/values.classw)] = (bins[Math.floor(y/values.classw)] || 0) + 1;
+	x = Math.floor((y - offset)/values.classw)
+	bins[x] = (bins[x] || 0) + 1;
+	nbins = Math.max(nbins,x);
 	if (y < pos)
 	    below++;
     });
+    nbins += 1;
+    scale = gwidth/(nbins * values.classw);
+
     for (var i=0;i<Math.max(bins.length,nbins);i++) {
 	bins[i] = bins[i] || 0;
     }
-    var x = Math.floor(pos/values.classw);
-    for (var i=0;i<x;i++) {
-	abelow += bins[i];
+    x = Math.floor((pos-offset)/values.classw);
+    if (x < nbins) {
+	abelow = (pos/values.classw - x)*bins[x];
+    
+	for (var i=0;i<x;i++) {
+	    abelow += bins[i];
+	}
+    } else {
+	abelow = values.number;
     }
     hbin = 10/Math.ceil(Math.max.apply(null,bins)/10);
     document.querySelector('#below').innerHTML = below;
@@ -170,7 +190,7 @@ function getValues () {
     document.querySelector('#smean').innerHTML = Math.round10(mean(data),-1);
     document.querySelector('#smedian').innerHTML = Math.round10(median(data),-1);
     var md = mode(bins);
-    document.querySelector('#smode').innerHTML = md * values.classw + ' - ' + (md+1) * values.classw;
+    document.querySelector('#smode').innerHTML = (md * values.classw + offset) + ' - ' + ((md+1) * values.classw + offset);
     document.querySelector('#svariance').innerHTML = Math.round10(variance(data),-1);
     document.querySelector('#sstddev').innerHTML = Math.round10(stddev(data),-1);
     var lq = Math.round10(lowerquartile(data),-1);
@@ -179,16 +199,23 @@ function getValues () {
     document.querySelector('#supq').innerHTML = uq;
     document.querySelector('#siqrange').innerHTML = Math.round10(uq - lq,-1);
 
-    lq = Math.round10(binlowerquartile(bins),-1) * values.classw;
-    uq = Math.round10(binupperquartile(bins),-1) * values.classw;
+    lq = Math.round10(binlowerquartile(bins) * values.classw + offset,-1);
+    var mq = Math.round10(binmedian(bins) * values.classw + offset,-1);
+    uq = Math.round10(binupperquartile(bins) * values.classw + offset,-1);
     document.querySelector('#sblowq').innerHTML = lq;
+    document.querySelector('#sbmedian').innerHTML = mq;
     document.querySelector('#sbupq').innerHTML = uq;
     document.querySelector('#sbiqrange').innerHTML = Math.round10(uq - lq,-1);
 
+    // Raw data
     var datatxt = data.map(function(v) {return Math.round10(v,-1)}).join([separator = ', ']);
     document.querySelector('#data').innerHTML = datatxt;
+
+    // Sorted data
     datatxt = sdata.map(function(v) {return Math.round10(v,-1)}).join([separator = ', ']);
     document.querySelector('#sdata').innerHTML = datatxt;
+
+    // Frequency Table
     var tbl = document.querySelector("#freq");
     var tblbdy = document.createElement('tbody');
     var nrow,ncell,ntxt,bbin,tbin;
@@ -204,10 +231,10 @@ function getValues () {
     for (var i=bbin;i<tbin;i++) {
 	nrow = tblbdy.insertRow(i - bbin);
 	ncell = nrow.insertCell(0);
-	ntxt = document.createTextNode((i * values.classw));
+	ntxt = document.createTextNode((i * values.classw) + offset);
 	ncell.appendChild(ntxt);
 	ncell = nrow.insertCell(1);
-	ntxt = document.createTextNode(' - ' + (i+1) * values.classw);
+	ntxt = document.createTextNode(" \u2014 " + ((i+1) * values.classw + offset));
 	ncell.appendChild(ntxt);
 	ncell = nrow.insertCell(2);
 	ntxt = document.createTextNode(bins[i]);
@@ -215,6 +242,7 @@ function getValues () {
     }
     tbl.replaceChild(tblbdy,document.querySelector('#freqrows'));
     tblbdy.id = 'freqrows';
+    // Stem and Leaf
     var sdata = data.map(function(v) {return Math.floor(v+.5)});
     sdata.sort(compareNumbers);
     tbl = document.querySelector("#stem");
@@ -240,6 +268,7 @@ function getValues () {
     );
     tbl.replaceChild(tblbdy,document.querySelector('#stemrows'));
     tblbdy.id = 'stemrows';
+    // Draw histogram and box plot
     draw();
 }
 
@@ -250,7 +279,7 @@ function getRelativeCoords(event) {
 
 function recalc(e) {
     var coords = getRelativeCoords(e);
-    pos = (coords.x - border)/scale;
+    pos = (coords.x - border)/scale + offset;
     below=0;
     abelow = 0;
     data.forEach(
@@ -259,13 +288,18 @@ function recalc(e) {
 		below++;
 	}
     );
-    var x = Math.floor(pos/values.classw);
-    for (var i=0;i<x;i++) {
-	abelow += bins[i];
+    var x = Math.floor((pos-offset)/values.classw);
+    if (x < nbins) {
+	abelow = ((pos-offset)/values.classw - x)*bins[x];
+    
+	for (var i=0;i<x;i++) {
+	    abelow += bins[i];
+	}
+    } else {
+	abelow = values.number;
     }
-    abelow += bins[x]*(pos - values.classw*x)/values.classw;
     document.querySelector('#below').innerHTML = below;
-    document.querySelector('#abelow').innerHTML = Math.floor(abelow + .5);
+    document.querySelector('#abelow').innerHTML = Math.round10(abelow,-1);//Math.floor(abelow + .5);
     document.querySelector('#mark').innerHTML = Math.floor(pos);
     draw();
 }
@@ -289,15 +323,16 @@ function draw() {
     hctx.save();
     hctx.translate(0,histogram.height);
     hctx.translate(10,-20);
+    hctx.translate(-offset*scale,0);
     drawAxes(hctx);
     hctx.strokeStyle = "black";
     for (var i=0; i<nbins;i++) {
 	hctx.fillStyle = 'gray';
-	hctx.fillRect(i*values.classw*scale,0,values.classw*scale,-bins[i]*hbin);
+	hctx.fillRect((i*values.classw+offset)*scale,0,values.classw*scale,-bins[i]*hbin);
 	if (bins[i] != 0) {
 	    tm = hctx.measureText(bins[i]);
 	    hctx.fillStyle = 'black';
-	    hctx.fillText(bins[i],values.classw*(i+.5)*scale-tm.width/2,-10);
+	    hctx.fillText(bins[i],(values.classw*(i+.5)+offset)*scale-tm.width/2,-10);
 	}
     }
     hctx.fillStyle = 'blue';
@@ -309,7 +344,7 @@ function draw() {
     hctx.fillStyle = 'red';
     for (var i=0; i<bins.length; i++) {
 	for (var j=0; j<bins[i]; j++) {
-	    mark(hctx,values.classw*i*scale + (j+.5)*scale*values.classw/bins[i],-70);
+	    mark(hctx,(values.classw*i+offset)*scale + (j+.5)*scale*values.classw/bins[i],-70);
 	}
     }
     hctx.strokeStyle = "red";
@@ -324,7 +359,8 @@ function draw() {
     bctx.save()
     bctx.translate(0,boxplot.height);
     bctx.translate(10,-20);
-    drawAxes(bctx);
+    bctx.translate(-offset*scale,0);
+    drawAxes(bctx,0);
     var md = median(data);
     var lq = lowerquartile(data);
     var uq = upperquartile(data);
@@ -373,28 +409,30 @@ function mark(c,x,y) {
     c.fill();
 }
 
-function drawAxes(c) {
+function drawAxes(c,o) {
+    if (o === undefined) {
+	o = offset;
+    }
     c.beginPath();
     c.moveTo(0,10);
     c.lineTo(0,-height + 10);
     c.stroke();
     c.beginPath();
-    c.moveTo(-10,0);
-    c.lineTo(width - 10,0);
+    c.moveTo(-10+offset*scale,0);
+    c.lineTo(width - 10+offset*scale,0);
     c.stroke();
     c.beginPath();
     var tm;
-    for (var i=0;i<11;i++) {
-	c.moveTo(10*i*scale,0);
-	c.lineTo(10*i*scale,5);
-	tm = c.measureText(i*10);
-	c.fillText(i*10,10*i*scale-tm.width/2,14);
+    c.fillStyle = 'black';
+    for (var i=0; i<=nbins;i++) {
+	tm = hctx.measureText(i*values.classw+o);
+	c.fillText(i*values.classw+o,(values.classw*i+o)*scale-tm.width/2,14);
     }
     c.stroke();
 }
 
 function setSize() {
-    border = 20;
+    var fheight, fwidth;
     fheight=Math.min(window.innerHeight - form.offsetHeight,100+2*border+bheight);
     fwidth=window.innerWidth;
     histogram.height=fheight;
@@ -404,8 +442,6 @@ function setSize() {
     width = fwidth - 2*border;
     height = fheight - 2*border;
     gwidth = width - bwidth;
-    gheight = height - bheight;
-    scale = gwidth/100;
 }
 
 function clear(c) {
@@ -422,6 +458,7 @@ function checkReturn(e) {
     if(e && e.keyCode == 13)
     {
 	getValues();
+	return false;
     }
 }
 
@@ -505,6 +542,21 @@ function binlowerquartile (b) {
     }
 }
 
+function binmedian (b) {
+    var n = 0;
+    for (var j = 0; j < b.length; j++) {
+	n += b[j];
+    }
+    n = n/2;
+    var m = 0;
+    for (var j = 0; j < b.length; j++) {
+	if (m + b[j] > n) {
+	    return j + (n - m)/b[j];
+	}
+	m += b[j];
+    }
+}
+
 function binupperquartile (b) {
     var n = 0;
     for (var j = 0; j < b.length; j++) {
@@ -575,4 +627,24 @@ function binupperquartile (b) {
 
 function compareNumbers(a,b) {
     return a - b;
+}
+
+function toggle_div(e) {
+    var dv;
+    var src;
+    var e = e || window.event;
+    src = e.srcElement || e.target;
+    dv = src.parentElement;
+    dv = dv.nextSibling;
+    while (dv && dv.nodeType != 1) {
+	dv = dv.nextSibling;
+    }
+    if (dv.style.display && dv.style.display == 'none') {
+	dv.style.display = 'block';
+	src.innerHTML = '&#9660;';
+    } else {
+	dv.style.display = 'none';
+	src.innerHTML = '&#9654;';
+    }
+    return false;
 }
