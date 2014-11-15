@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <title>Statistics</title>
     <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="text/javascript" src="data.js"></script>
     <script type="text/javascript" src="script.js"></script>
   </head>
   <body>
     <h1>S1 - Statistics</h1>
-    <form id="values">
-      <h3><a href="#" class="arrow">&#9660;</a>Data Definintion</h3>
-      <div id="form_defn">
+    <h3><a href="#" class="arrow">&#9660;</a>Data Definintion</h3>
+    <div id="data_defn">
+      <form id="data_form">
 	<table class="text">
 	  <tr>
 	    <td>
@@ -23,6 +24,19 @@
 		<option value="gaussian">Gaussian (Normal)</option>
 		<option value="exponential">Exponential</option>
 		<option value="uniform">Uniform</option>
+	      </select>
+	  </tr>
+	  <tr>
+	    <td>
+	      <label for="type">
+		Data type:
+	      </label>
+	    </td>
+	    <td>
+	      <select name="type">
+		<option value="continuous">Continuous</option>
+		<option value="discrete">Discrete</option>
+		<option value="rounded">Continuous but rounded</option>
 	      </select>
 	  </tr>
 	  <tr>
@@ -67,9 +81,17 @@
 	  </tr>
 	</table>
 	<button name="reset" id="reset">Regenerate data</button>
-      </div>
-      <h3><a href="#" class="arrow">&#9660;</a>Data Representation</h3>
-      <div id="form_rep">
+      </form>
+    </div>
+    <h3><a href="#" class="arrow">&#9660;</a>Raw Data</h3>
+    <div id="data">
+    </div>
+    <h3><a href="#" class="arrow">&#9660;</a>Sorted Raw Data</h3>
+    <div id="sdata">
+    </div>
+    <h3><a href="#" class="arrow">&#9660;</a>Data Representation</h3>
+    <div id="form_rep">
+      <form id="class_form">
 	<table class="text">
 	  <tr>
 	    <td>
@@ -102,13 +124,7 @@
 	    </td>
 	  </tr>
 	</table>
-      </div>
-    </form>
-    <h3><a href="#" class="arrow">&#9660;</a>Raw Data</h3>
-    <div id="data">
-    </div>
-    <h3><a href="#" class="arrow">&#9660;</a>Sorted Raw Data</h3>
-    <div id="sdata">
+      </form>
     </div>
     <h3><a href="#" class="arrow">&#9660;</a>Frequency Table</h3>
     <div id="freq_table">
@@ -149,7 +165,7 @@
     </div>
     <h3><a href="#" class="arrow">&#9660;</a>Histogram</h3>
     <div id="hist">
-      <canvas id="histogram"></canvas>
+      <canvas id="histogram" height="100"></canvas>
       <table id="readings" class="text">
 	<tr>
 	  <td>
@@ -179,7 +195,7 @@
     </div>
     <h3><a href="#" class="arrow">&#9660;</a>Boxplot</h3>
     <div id="box">
-      <canvas id="boxplot"></canvas>
+      <canvas id="boxplot" height="100"></canvas>
     </div>
     <h3><a href="#" class="arrow">&#9660;</a>Sample Statistics</h3>
     <div id="sample">
