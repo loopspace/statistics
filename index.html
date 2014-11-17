@@ -12,83 +12,216 @@
     <h3><a href="#" class="arrow">&#9660;</a>Data Definintion</h3>
     <div id="data_defn">
       <form id="data_form">
-	<table class="text">
-	  <tr>
-	    <td>
-	      <label for="distribution">
-		Distribution:
-	      </label>
-	    </td>
-	    <td>
-	      <select name="distribution">
-		<option value="gaussian">Gaussian (Normal)</option>
-		<option value="exponential">Exponential</option>
-		<option value="uniform">Uniform</option>
-	      </select>
-	  </tr>
-	  <tr>
-	    <td>
-	      <label for="type">
-		Data type:
-	      </label>
-	    </td>
-	    <td>
-	      <select name="type">
-		<option value="continuous">Continuous</option>
-		<option value="discrete">Discrete</option>
-		<option value="rounded">Continuous but rounded</option>
-	      </select>
-	  </tr>
-	  <tr>
-	    <td>
-	      <label for="number">
-		Number of points:
-	      </label>
-	    </td>
-	    <td>
-	      <input type="text" name="number" id="number" value="20">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <label for="mean">
-		Distribution mean:
-	      </label>
-	    </td>
-	    <td>
-	      <input type="text" name="mean" id="mean" value="20">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <label for="stddev">
-		Standard deviation:
-	      </label>
-	    </td>
-	    <td>
-	      <input type="text" name="stddev" id="stddev" value="5">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <label for="edata">
-		Extra data points:
-	      </label>
-	    </td>
-	    <td>
-	      <input type="text" name="edata" id="edata" value="">
-	    </td>
-	  </tr>
-	</table>
-	<button name="reset" id="reset">Regenerate data</button>
+	<div id="data_defn_X" class="dataform">
+	  <h4>First Data Sample</h4>
+	  <table class="text">
+	    <tr>
+	      <td>
+		<label for="distribution_X">
+		  Distribution:
+		</label>
+	      </td>
+	      <td>
+		<select name="distribution_X">
+		  <option value="gaussian">Gaussian (Normal)</option>
+		  <option value="exponential">Exponential</option>
+		  <option value="uniform">Uniform</option>
+		</select>
+	    </tr>
+	    <tr>
+	      <td>
+		<label for="type_X">
+		  Data type:
+		</label>
+	      </td>
+	      <td>
+		<select name="type_X">
+		  <option value="continuous">Continuous</option>
+		  <option value="discrete">Discrete</option>
+		  <option value="rounded">Continuous but rounded</option>
+		</select>
+	    </tr>
+	    <tr>
+	      <td>
+		<label for="number_X">
+		  Number of points:
+		</label>
+	      </td>
+	      <td>
+		<input type="text" name="number_X" id="number_X" value="20">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<label for="mean_X">
+		  Distribution mean:
+		</label>
+	      </td>
+	      <td>
+		<input type="text" name="mean_X" id="mean_X" value="20">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<label for="stddev_X">
+		  Standard deviation:
+		</label>
+	      </td>
+	      <td>
+		<input type="text" name="stddev_X" id="stddev_X" value="5">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<label for="edata_X">
+		  Extra data points:
+		</label>
+	      </td>
+	      <td>
+		<input type="text" name="edata_X" id="edata_X" value="">
+	      </td>
+	    </tr>
+	  </table>
+	  <button name="reset" id="reset">Regenerate data</button>
+	</div>
+	<div id="data_defn_Y" class="dataform">
+	  <h4>Second Data Sample</h4>
+	  <table class="text">
+	    <tr>
+	      <td>
+		<label for="active_Y">
+		  Enable:
+		</label>
+	      </td>
+	      <td>
+		<input type="checkbox" name="enable_Y" id="enable_Y" value="">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<label for="distribution_Y">
+		  Distribution:
+		</label>
+	      </td>
+	      <td>
+		<select name="distribution_Y">
+		  <option value="gaussian">Gaussian (Normal)</option>
+		  <option value="exponential">Exponential</option>
+		  <option value="uniform">Uniform</option>
+		</select>
+	    </tr>
+	    <tr>
+	      <td>
+		<label for="type_Y">
+		  Data type:
+		</label>
+	      </td>
+	      <td>
+		<select name="type_Y">
+		  <option value="continuous">Continuous</option>
+		  <option value="discrete">Discrete</option>
+		  <option value="rounded">Continuous but rounded</option>
+		</select>
+	    </tr>
+	    <tr>
+	      <td>
+		<label for="number_Y">
+		  Number of points:
+		</label>
+	      </td>
+	      <td>
+		<input type="text" name="number_Y" id="number_Y" value="20">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<label for="mean_Y">
+		  Distribution mean:
+		</label>
+	      </td>
+	      <td>
+		<input type="text" name="mean_Y" id="mean_Y" value="20">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<label for="stddev_Y">
+		  Standard deviation:
+		</label>
+	      </td>
+	      <td>
+		<input type="text" name="stddev_Y" id="stddev_Y" value="5">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<label for="edata_Y">
+		  Extra data points:
+		</label>
+	      </td>
+	      <td>
+		<input type="text" name="edata_Y" id="edata_Y" value="">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<label for="correlate">
+		  Correlate:
+		</label>
+	      </td>
+	      <td>
+		<input type="checkbox" name="correlate" id="correlate" value="">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<label for="correlation">
+		  Desired Correlation:
+		</label>
+	      </td>
+	      <td>
+		<input type="text" name="correlation" id="correlation" checked="">
+	      </td>
+	    </tr>
+	  </table>
+	</div>
       </form>
+      <div style="clear: both;"></div>
     </div>
     <h3><a href="#" class="arrow">&#9660;</a>Raw Data</h3>
-    <div id="data">
-    </div>
+    <table class="data_table">
+      <tr>
+	<td class="first">
+	  First Sample:
+	</td>
+	<td id="data_X">
+	</td>
+      </tr>
+      <tr class="second">
+	<td>
+	  Second Sample:
+	</td>
+	<td id="data_Y">
+	</td>
+      </tr>
+    </table>
     <h3><a href="#" class="arrow">&#9660;</a>Sorted Raw Data</h3>
-    <div id="sdata">
-    </div>
+    <table class="data_table">
+      <tr>
+	<td class="first">
+	  First Sample:
+	</td>
+	<td id="sdata_X">
+	</td>
+      </tr>
+      <tr class="second">
+	<td>
+	  Second Sample:
+	</td>
+	<td id="sdata_Y">
+	</td>
+      </tr>
+    </table>
     <h3><a href="#" class="arrow">&#9660;</a>Data Representation</h3>
     <div id="form_rep">
       <form id="class_form">
@@ -201,87 +334,125 @@
     <div id="sample">
       <table id="stats" class="text">
 	<tr>
+	  <th></th>
+	  <th class="first">First Sample</th>
+	  <th class="second">Second Sample</th>
+	</tr>
+	<tr>
 	  <td>
 	    Mean:
 	  </td>
-	  <td id="smean">
+	  <td id="smean_X" class="first">
+	  </td>
+	  <td id="smean_Y" class="second">
 	  </td>
 	</tr>
 	<tr>
 	  <td>
 	    Median:
 	  </td>
-	  <td id="smedian">
+	  <td id="smedian_X" class="first">
+	  </td>
+	  <td id="smedian_Y" class="second">
 	  </td>
 	</tr>
 	<tr>
 	  <td>
 	    Modal class:
 	  </td>
-	  <td id="smode">
+	  <td id="smode_X" class="first">
+	  </td>
+	  <td id="smode_Y" class="second">
 	  </td>
 	</tr>
 	<tr>
 	  <td>
 	    Variance:
 	  </td>
-	  <td id="svariance">
+	  <td id="svariance_X" class="first">
+	  </td>
+	  <td id="svariance_Y" class="second">
 	  </td>
 	</tr>
 	<tr>
 	  <td>
 	    Standard Deviation:
 	  </td>
-	  <td id="sstddev">
+	  <td id="sstddev_X" class="first">
+	  </td>
+	  <td id="sstddev_Y" class="second">
 	  </td>
 	</tr>
 	<tr>
 	  <td>
 	    Lower Quartile:
 	  </td>
-	  <td id="slowq">
+	  <td id="slowq_X" class="first">
+	  </td>
+	  <td id="slowq_Y" class="second">
 	  </td>
 	</tr>
 	<tr>
 	  <td>
 	    Upper Quartile:
 	  </td>
-	  <td id="supq">
+	  <td id="supq_X" class="first">
+	  </td>
+	  <td id="supq_Y" class="second">
 	  </td>
 	</tr>
 	<tr>
 	  <td>
 	    Inter-Quartile Range:
 	  </td>
-	  <td id="siqrange">
+	  <td id="siqrange_X" class="first">
+	  </td>
+	  <td id="siqrange_Y" class="second">
 	  </td>
 	</tr>
 	<tr>
 	  <td>
-	    Lower Quartile Estimate:
+	    Estimate of Mean:
 	  </td>
-	  <td id="sblowq">
+	  <td id="sbmean_X" class="first">
 	  </td>
-	</tr>
-	<tr>
-	  <td>
-	    Median Estimate:
-	  </td>
-	  <td id="sbmedian">
+	  <td id="sbmean_Y" class="second">
 	  </td>
 	</tr>
 	<tr>
 	  <td>
-	    Upper Quartile Estimate:
+	    Estimate of Median:
 	  </td>
-	  <td id="sbupq">
+	  <td id="sbmedian_X" class="first">
+	  </td>
+	  <td id="sbmedian_Y" class="second">
 	  </td>
 	</tr>
 	<tr>
 	  <td>
-	    Inter-Quartile Range Estimate:
+	    Estimate of Lower Quartile:
 	  </td>
-	  <td id="sbiqrange">
+	  <td id="sblowq_X" class="first">
+	  </td>
+	  <td id="sblowq_Y" class="second">
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    Estimate of Upper Quartile:
+	  </td>
+	  <td id="sbupq_X" class="first">
+	  </td>
+	  <td id="sbupq_Y" class="second">
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    Estimate of Inter-Quartile Range:
+	  </td>
+	  <td id="sbiqrange_X" class="first">
+	  </td>
+	  <td id="sbiqrange_Y" class="second">
 	  </td>
 	</tr>
       </table>

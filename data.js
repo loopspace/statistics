@@ -5,6 +5,7 @@ var data_types = [];
 var precision = -1;
 
 Data = function() {
+    this.active = true;
 }
 
 Data.prototype.generate = function(m,s,n,d,t) {
@@ -22,6 +23,35 @@ Data.prototype.initialise = function() {
     this.sdata = this.data.slice(0);
     this.sdata.sort(compareNumbers);
     this.stats = [];
+}
+
+Data.prototype.has_data = function() {
+    if (this.data && this.data.length > 0) {
+	return true;
+    } else {
+	return false;
+    }
+}
+
+Data.prototype.set_field = function(id,s) {
+//    if (this.active) {
+	document.querySelector('#' + id).innerHTML = s;
+//    }
+}
+
+Data.prototype.enable = function(b) {
+    this.active = b;
+}
+
+Data.prototype.correlate = function(d,r) {
+    var r = r || 0;
+    r = Math.max(Math.min(r,1),-1);
+    var s = Math.sqrt(1 - r*r);
+    var data = [];
+    for (var i=0; i< this.gdata.length; i++) {
+	data.push(s * this.gdata[i] + r * d.gdata[i]);
+    }
+    this.gdata = data;
 }
 
 Data.prototype.set_table = function(o,w) {
@@ -44,12 +74,12 @@ Data.prototype.set_table = function(o,w) {
 
 Data.prototype.write = function(id) {
     var datatxt = this.data.map(function(v) {return Math.round10(v,-1)}).join([separator = ', ']);
-    set_field(id,datatxt);
+    this.set_field(id,datatxt);
 }
 
 Data.prototype.write_sorted = function(id) {
     var datatxt = this.sdata.map(function(v) {return Math.round10(v,-1)}).join([separator = ', ']);
-    set_field(id,datatxt);
+    this.set_field(id,datatxt);
 }
 
 Data.prototype.write_table = function(id) {
@@ -118,7 +148,7 @@ Data.prototype.write_below = function(id,p) {
 	    n++;
 	}
     });
-    set_field(id,n);
+    this.set_field(id,n);
 }
 
 Data.prototype.write_abelow = function(id,p) {
@@ -133,7 +163,7 @@ Data.prototype.write_abelow = function(id,p) {
     } else {
 	abelow = this.data.length;
     }
-    set_field(id,Math.round10(abelow,-1));
+    this.set_field(id,Math.round10(abelow,-1));
 }
 
 Data.prototype.mean = function() {
@@ -147,7 +177,7 @@ Data.prototype.mean = function() {
 }
 
 Data.prototype.write_mean = function(id) {
-    set_field(id,Math.round10(this.mean(),precision));
+    this.set_field(id,Math.round10(this.mean(),precision));
 }
     
 Data.prototype.variance = function() {
@@ -162,7 +192,7 @@ Data.prototype.variance = function() {
 }
 
 Data.prototype.write_variance = function(id) {
-    set_field(id,Math.round10(this.variance(),precision));
+    this.set_field(id,Math.round10(this.variance(),precision));
 }
 
 Data.prototype.stddev = function() {
@@ -175,7 +205,7 @@ Data.prototype.stddev = function() {
 }
 
 Data.prototype.write_stddev = function(id) {
-    set_field(id,Math.round10(this.stddev(),precision));
+    this.set_field(id,Math.round10(this.stddev(),precision));
 }
 
 Data.prototype.ntile = function(k,n) {
@@ -195,7 +225,7 @@ Data.prototype.median = function(id) {
 }
 
 Data.prototype.write_median = function(id) {
-    set_field(id,Math.round10(this.median(),precision));
+    this.set_field(id,Math.round10(this.median(),precision));
 }
 
 Data.prototype.lowerquartile = function() {
@@ -207,7 +237,7 @@ Data.prototype.lowerquartile = function() {
 }
 
 Data.prototype.write_lowerquartile = function(id) {
-    set_field(id,Math.round10(this.lowerquartile(),precision));
+    this.set_field(id,Math.round10(this.lowerquartile(),precision));
 }
 
 Data.prototype.upperquartile = function() {
@@ -219,7 +249,7 @@ Data.prototype.upperquartile = function() {
 }
 
 Data.prototype.write_upperquartile = function(id) {
-    set_field(id,Math.round10(this.upperquartile(),precision));
+    this.set_field(id,Math.round10(this.upperquartile(),precision));
 }
 
 Data.prototype.interquartilerange = function() {
@@ -227,7 +257,7 @@ Data.prototype.interquartilerange = function() {
 }
 
 Data.prototype.write_interquartilerange = function(id) {
-    set_field(id,Math.round10(this.interquartilerange(),precision));
+    this.set_field(id,Math.round10(this.interquartilerange(),precision));
 }
 
 Data.prototype.entile = function(k,n) {
@@ -255,7 +285,7 @@ Data.prototype.binlowerquartile = function() {
 }
 
 Data.prototype.write_binlowerquartile = function(id) {
-    set_field(id,Math.round10(this.binlowerquartile(),precision));
+    this.set_field(id,Math.round10(this.binlowerquartile(),precision));
 }
 
 Data.prototype.binupperquartile = function() {
@@ -267,7 +297,23 @@ Data.prototype.binupperquartile = function() {
 }
 
 Data.prototype.write_binupperquartile = function(id) {
-    set_field(id,Math.round10(this.binupperquartile(),precision));
+    this.set_field(id,Math.round10(this.binupperquartile(),precision));
+}
+
+Data.prototype.binmean = function() {
+    if (this.stats.binmean) {
+	return this.stats.binmean;
+    }
+    var s = 0;
+    for (var j=0; j < this.bins.length; j++) {
+	s += this.bins[j] * ((j + .5) * this.width + this.offset);
+    }
+    this.stats.binmean = s/this.data.length;
+    return this.stats.binmean;
+}
+
+Data.prototype.write_binmean = function(id) {
+    this.set_field(id,Math.round10(this.binmean(),precision));
 }
 
 Data.prototype.binmedian = function() {
@@ -279,7 +325,7 @@ Data.prototype.binmedian = function() {
 }
 
 Data.prototype.write_binmedian = function(id) {
-    set_field(id,Math.round10(this.binmedian(),precision));
+    this.set_field(id,Math.round10(this.binmedian(),precision));
 }
 
 Data.prototype.bininterquartilerange = function() {
@@ -287,7 +333,7 @@ Data.prototype.bininterquartilerange = function() {
 }
 
 Data.prototype.write_bininterquartilerange = function(id) {
-    set_field(id,Math.round10(this.bininterquartilerange(),precision));
+    this.set_field(id,Math.round10(this.bininterquartilerange(),precision));
 }
 
 Data.prototype.mode = function() {
@@ -308,7 +354,7 @@ Data.prototype.mode = function() {
 
 Data.prototype.write_mode = function(id) {
     str = (this.mode() * this.width + this.offset) + ' \u2014 ' + ((this.mode() + 1) * this.width + this.offset);
-    set_field(id,str);
+    this.set_field(id,str);
 }
 
 Data.prototype.draw_histogram = function(ctx,pos) {
@@ -447,9 +493,6 @@ var compareNumbers = function(a,b) {
 }
 
 
-var set_field = function(id,s) {
-    document.querySelector('#' + id).innerHTML = s;
-}
 
 var makeGauss = function() {
     var g;

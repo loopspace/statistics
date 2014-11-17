@@ -50,3 +50,24 @@ canvas {
     margin-left: 20px;
     margin-right: 20px;
 }
+
+#data_defn_X {
+    width: 50%;
+    float: left;
+}
+
+#data_defn_Y {
+    margin-left: 50%;
+}
+
+#data_form {
+    overflow: hidden;
+}
+
+#stats th {
+    padding-right: 5px;
+}
+
+.data_table td:first-child {
+    text-align: right;
+}

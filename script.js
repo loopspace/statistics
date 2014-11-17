@@ -1,7 +1,8 @@
 var hctx;
 var bctx;
 var values = new Object();
-var data = new Data();
+var data_X = new Data();
+var data_Y = new Data();
 var scale = 10;
 
 var pos;
@@ -30,9 +31,16 @@ function init() {
 	if (element.type === "text")
     	    element.onkeypress = checkReturn;
     }
+    var correlate = document.querySelector('#correlate');
+    correlate.onchange = setCorrelation;
+    setCorrelation_aux(correlate);
+
+    var enable = document.querySelector('#enable_Y');
+    enable.onchange = activateY;
+    activateY_aux(enable);
 
     var button = document.querySelector("#reset");
-    button.onclick = function() {getValues(true)};
+    button.onclick = function() {getValues(true); return false;};
     
     elts = document.getElementsByClassName('arrow');
     for (var i=0, element; element = elts[i++];) {
@@ -50,20 +58,22 @@ function getValues (redo) {
     var redo = redo || false;
     var x;
     var ndarr = [];
+    var ename;
     for (var i=0, element; element = elts[i++];) {
-
+	ename = element.name.substring(0,element.name.indexOf('_'));
 	if (element.type === "text") {
-	    if (element.name === "edata") {
+	    if (ename === "edata") {
 		if (element.value != '') {
 		    ndarr = element.value.split(/\s*[\s,;]+\s*/);
 		    ndarr = ndarr.map(function(d) {return parseInt(d,10)});
+		    values[element.name] = ndarr;
 		}
 	    } else {
 		x = parseInt(element.value,10);
 		if (
-		    ((element.name == "mean")
-		     || (element.name == "stddev")
-		     || (element.name == "number")
+		    ((ename == "mean")
+		     || (ename == "stddev")
+		     || (ename == "number")
 		    )
 			&& (x != values[element.name] )
 		) 
@@ -75,7 +85,10 @@ function getValues (redo) {
 	    x = element.options.selectedIndex;
 	    if (x != values[element.name])
 		redo = true;
-	    values[element.name] = x
+	    values[element.name] = x;
+	}
+	if (element.type === 'checkbox') {
+	    values[element.name] = element.checked;
 	}
     }
     var elts = document.querySelector("#class_form").elements;
@@ -84,39 +97,94 @@ function getValues (redo) {
 	    values[element.name] = parseInt(element.value,10);
     }
 
+    if (values.correlate) {
+	values.number_Y = values.number_X;
+	values.type_Y = values.type_X;
+	values.distribution_Y = values.distribution_X;
+    }
+    
     if (redo) {
 	// Regenerate random data
-	data.generate(values.mean,values.stddev,values.number,values.distribution,values.type);
+	data_X.generate(values.mean_X,values.stddev_X,values.number_X,values.distribution_X,values.type_X);
+	data_Y.generate(values.mean_Y,values.stddev_Y,values.number_Y,values.distribution_Y,values.type_Y);
     }
-    data.add_data(ndarr);
-    data.initialise();
-    data.set_table(values.classb,values.classw);
-    pos = data.median();
-    data.write_below('below',pos);
-    data.write_abelow('abelow',pos);
-    document.querySelector('#mark').innerHTML = Math.floor(pos);
-    data.write_mean('smean');
-    data.write_median('smedian');
-    data.write_mode('smode');
-    data.write_variance('svariance');
-    data.write_stddev('sstddev');
-    data.write_lowerquartile('slowq');
-    data.write_upperquartile('supq');
-    data.write_interquartilerange('siqrange');
-    data.write_binlowerquartile('sblowq');
-    data.write_binmedian('sbmedian');
-    data.write_binupperquartile('sbupq');
-    data.write_bininterquartilerange('sbiqrange');
+    if (values.correlate) {
+	data_Y.correlate(data_X,values.correlation||0);
+	values.edata_X = values.edata_X || [];
+	values.edata_Y = values.edata_Y || [];
+	if (values.edata_X.length > values.edata_Y.length) {
+	    if (values.edata_Y.length > 0) {
+		for (var i = 0; i < values.edata_X.length - values.edata_Y.length; i++) {
+		    values.edata_Y.push(values.edata_Y[values.edata_Y.length-1]);
+		}
+	    } else {
+		values.edata_Y = values.edata_X;
+	    }
+	} else if (values.edata_X.length < values.edata_Y.length) {
+	    if (valeus.edata_X.length > 0) {
+		for (var i = 0; i < values.edata_Y.length - values.edata_X.length; i++) {
+		    values.edata_X.push(values.edata_X[values.edata_X.length-1]);
+		}
+	    } else {
+		values.edata_X = values.edata_Y;
+	    }
+	}
+    }
+    data_X.add_data(values.edata_X||[]);
+    data_X.initialise();
+    data_X.set_table(values.classb,values.classw);
 
-    data.write('data');
-    data.write_sorted('sdata');
+    data_Y.add_data(values.edata_Y||[]);
+    data_Y.initialise();
+    data_Y.set_table(values.classb,values.classw);
+
+    pos = data_X.median();
+    data_X.write_below('below',pos);
+    data_X.write_abelow('abelow',pos);
+    document.querySelector('#mark').innerHTML = Math.floor(pos);
+    
+    data_X.write_mean('smean_X');
+    data_X.write_median('smedian_X');
+    data_X.write_mode('smode_X');
+    data_X.write_variance('svariance_X');
+    data_X.write_stddev('sstddev_X');
+    data_X.write_lowerquartile('slowq_X');
+    data_X.write_upperquartile('supq_X');
+    data_X.write_interquartilerange('siqrange_X');
+    data_X.write_binlowerquartile('sblowq_X');
+    data_X.write_binmedian('sbmedian_X');
+    data_X.write_binmean('sbmean_X');
+    data_X.write_binupperquartile('sbupq_X');
+    data_X.write_bininterquartilerange('sbiqrange_X');
+
+    data_X.write('data_X');
+    data_X.write_sorted('sdata_X');
+
+    data_Y.write_mean('smean_Y');
+    data_Y.write_median('smedian_Y');
+    data_Y.write_mode('smode_Y');
+    data_Y.write_variance('svariance_Y');
+    data_Y.write_stddev('sstddev_Y');
+    data_Y.write_lowerquartile('slowq_Y');
+    data_Y.write_upperquartile('supq_Y');
+    data_Y.write_interquartilerange('siqrange_Y');
+    data_Y.write_binlowerquartile('sblowq_Y');
+    data_Y.write_binmedian('sbmedian_Y');
+    data_Y.write_binmean('sbmean_Y');
+    data_Y.write_binupperquartile('sbupq_Y');
+    data_Y.write_bininterquartilerange('sbiqrange_Y');
+
+    data_Y.write('data_Y');
+    data_Y.write_sorted('sdata_Y');
     // Frequency Table
-    data.write_table('freqrows');
+    data_X.write_table('freqrows');
     // Stem and Leaf
-    data.write_stem('stemrows');
+    data_X.write_stem('stemrows');
     // Draw histogram and box plot
-    data.draw_histogram(hctx,pos);
-    data.draw_boxplot(bctx);
+    data_X.draw_histogram(hctx,pos);
+    data_X.draw_boxplot(bctx);
+
+    return false;
 }
 
 function getRelativeCoords(event) {
@@ -126,11 +194,11 @@ function getRelativeCoords(event) {
 
 function recalc(e) {
     var coords = getRelativeCoords(e);
-    pos = (coords.x - parseInt(window.getComputedStyle(hctx.canvas).marginLeft,10) - parseInt(window.getComputedStyle(hctx.canvas).marginRight,10) + data.offset)/data.scale;
-    data.write_below('below',pos);
-    data.write_abelow('abelow',pos);
+    pos = (coords.x - parseInt(window.getComputedStyle(hctx.canvas).marginLeft,10) - parseInt(window.getComputedStyle(hctx.canvas).marginRight,10) + data_X.offset)/data_X.scale;
+    data_X.write_below('below',pos);
+    data_X.write_abelow('abelow',pos);
     document.querySelector('#mark').innerHTML = Math.floor(pos);
-    data.draw_histogram(hctx,pos);
+    data_X.draw_histogram(hctx,pos);
 }
 
 function doMouseDown(e) {
@@ -295,3 +363,52 @@ function toggle_div(e) {
     return false;
 }
 
+function setCorrelation(e) {
+    setCorrelation_aux(e.target);
+}
+
+function setCorrelation_aux(e) {
+    if (e.checked) {
+	document.getElementsByName('distribution_Y')[0].disabled = true;
+	document.getElementsByName('type_Y')[0].disabled = true;
+	document.getElementsByName('number_Y')[0].disabled = true;
+	document.getElementsByName('correlation')[0].disabled = false;
+    } else {
+	document.getElementsByName('distribution_Y')[0].disabled = false;
+	document.getElementsByName('type_Y')[0].disabled = false;
+	document.getElementsByName('number_Y')[0].disabled = false;
+	document.getElementsByName('correlation')[0].disabled = true;
+    }
+}
+
+function activateY(e) {
+    activateY_aux(e.target);
+}
+
+function activateY_aux(e) {
+    data_Y.enable(e.checked);
+    document.getElementsByName('distribution_Y')[0].disabled = !e.checked;
+    document.getElementsByName('type_Y')[0].disabled = !e.checked;
+    document.getElementsByName('number_Y')[0].disabled = !e.checked;
+    document.getElementsByName('mean_Y')[0].disabled = !e.checked;
+    document.getElementsByName('stddev_Y')[0].disabled = !e.checked;
+    document.getElementsByName('edata_Y')[0].disabled = !e.checked;
+    document.getElementsByName('correlate')[0].disabled = !e.checked;
+    document.getElementsByName('correlation')[0].disabled = !e.checked;
+
+    var elts = document.getElementsByClassName('second');
+    var vis;
+    if (e.checked) {
+	vis = 'visible';
+    } else {
+	vis = 'hidden';
+    }
+
+    for (var i=0; i< elts.length; i++) {
+	elts[i].style.visibility = vis;
+    }
+}
+
+function blank(id) {
+    document.querySelector('#' + id).innerHTML = '';
+}
