@@ -44,9 +44,11 @@ Data.prototype.enable = function(b) {
 }
 
 Data.prototype.correlate = function(d,r) {
+    console.log(r);
     var r = r || 0;
     r = Math.max(Math.min(r,1),-1);
     var s = Math.sqrt(1 - r*r);
+    console.log(r,s);
     var data = [];
     for (var i=0; i< this.gdata.length; i++) {
 	data.push(s * this.gdata[i] + r * d.gdata[i]);
@@ -249,6 +251,52 @@ Data.prototype.write_stddev = function(id) {
     this.set_field(id,Math.round10(this.stddev(),precision));
 }
 
+Data.prototype.Sxx = function() {
+    if (this.stats.Sxx) {
+	return this.stats.Sxx;
+    }
+    var s = 0;
+    var m = this.mean();
+    this.data.forEach(function(x) {s += (x - m)*(x - m)});
+    this.stats.Sxx = s;
+    return this.stats.Sxx;
+}
+
+Data.prototype.write_Sxx = function(id) {
+    this.set_field(id,Math.round10(this.Sxx(),precision));
+}
+
+Data.prototype.Sxy = function(d) {
+    if (this.stats.Sxy) {
+	return this.stats.Sxy;
+    }
+    var s = 0;
+    var m = this.mean();
+    var md = d.mean();
+    for (var i=0; i < this.data.length; i++) {
+	s += (this.data[i] - m) * (d.data[i] - md);
+    }
+    this.stats.Sxy = s;
+    return this.stats.Sxy;
+}
+
+Data.prototype.write_Sxy = function(id,d) {
+    this.set_field(id,Math.round10(this.Sxy(d),precision));
+}
+
+Data.prototype.pmcc = function(d) {
+    if (this.stats.pmcc) {
+	return this.stats.pmcc;
+    }
+    this.stats.pmcc = this.Sxy(d)/Math.sqrt(this.Sxx() * d.Sxx());
+    return this.stats.pmcc;
+}
+
+Data.prototype.write_pmcc = function(id,d) {
+    this.set_field(id,Math.round10(this.pmcc(d),precision));
+    
+}
+
 Data.prototype.ntile = function(k,n) {
     if (this.sdata.length%n == 0) {
 	return (this.sdata[k*this.sdata.length/n - 1] + this.sdata[k*this.sdata.length/n])/2;
@@ -303,8 +351,7 @@ Data.prototype.write_interquartilerange = function(id) {
 
 Data.prototype.entile = function(k,n) {
     var l = k/n*this.data.length;
-    var i = 0;
-    var m = 0;
+    var i = -1;
     for (var j=0; j < this.bins.length; j++) {
 	if (this.bins[j] < l) {
 	    i = j;
@@ -398,8 +445,7 @@ Data.prototype.write_mode = function(id) {
     this.set_field(id,str);
 }
 
-Data.prototype.draw_histogram = function(ctx,pos,scale) {
-    var hbin = 10/Math.ceil(Math.max.apply(null,this.bins)/10);
+Data.prototype.draw_histogram = function(ctx,pos,scale,hbin) {
     var tm;
     ctx.save();
 /*    ctx.translate(0,ctx.canvas.height);

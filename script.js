@@ -67,15 +67,16 @@ function getValues (redo) {
 	    if (ename === "edata") {
 		if (element.value != '') {
 		    ndarr = element.value.split(/\s*[\s,;]+\s*/);
-		    ndarr = ndarr.map(function(d) {return parseInt(d,10)});
+		    ndarr = ndarr.map(function(d) {return parseFloat(d)});
 		    values[element.name] = ndarr;
 		}
 	    } else {
-		x = parseInt(element.value,10);
+		x = parseFloat(element.value);
 		if (
 		    ((ename == "mean")
 		     || (ename == "stddev")
 		     || (ename == "number")
+		     || (ename == "correlation")
 		    )
 			&& (x != values[element.name] )
 		) 
@@ -90,15 +91,17 @@ function getValues (redo) {
 	    values[element.name] = x;
 	}
 	if (element.type === 'checkbox') {
+	    redo = true;
 	    values[element.name] = element.checked;
 	}
     }
     var elts = document.querySelector("#class_form").elements;
     for (var i=0, element; element = elts[i++];) {
 	if (element.type === "text")
-	    values[element.name] = parseInt(element.value,10);
+	    values[element.name] = parseFloat(element.value);
     }
-
+    values.number_X = parseInt(values.number_X,10);
+    values.number_Y = parseInt(values.number_Y,10);
     if (values.correlate) {
 	values.number_Y = values.number_X;
 	values.type_Y = values.type_X;
@@ -180,11 +183,24 @@ function getValues (redo) {
 
     data_Y.write('data_Y');
     data_Y.write_sorted('sdata_Y');
+
+    // Correlation
+    data_X.write_Sxx('Sxx');
+    data_Y.write_Sxx('Syy');
+    data_X.write_Sxy('Sxy',data_Y);
+    data_X.write_pmcc('pmcc',data_Y);
+
+    
     // Frequency Table
     var tblbdy = document.createElement('tbody');
-    var nrow,ncell,ntxt,bbin,tbin;
+    var nrow,ncell,ntxt,bbin,tbin,vis;
     var bbin = Math.min(data_X.zero,data_Y.zero);
     var tbin = Math.max(data_X.last,data_Y.last);
+    if (data_Y.active) {
+	vis = 'visible';
+    } else {
+	vis = 'hidden';
+    }
     for (var i=bbin;i<tbin;i++) {
 	nrow = tblbdy.insertRow(-1);
 	ncell = nrow.insertCell(-1);
@@ -197,11 +213,13 @@ function getValues (redo) {
 	ncell.classList.add('first');
 	if (i < data_X.zero || i >=data_X.last) {
 	    nrow.classList.add('second');
+	    nrow.style.visibility = vis;
 	}
 	ntxt = document.createTextNode(data_X.table_row(i));
 	ncell.appendChild(ntxt);
 	ncell = nrow.insertCell(-1);
 	ncell.classList.add('second');
+	ncell.style.visibility = vis;
 	if (i < data_Y.zero || i >=data_Y.last) {
 	    nrow.classList.add('first');
 	}
@@ -265,7 +283,7 @@ function checkReturn(e) {
     }
 }
 
-
+/*
 function mode (b) {
     var i = -1;
     var n = 0;
@@ -323,7 +341,7 @@ function binupperquartile (b) {
     }
 }
 
-
+*/
 // Copied from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
 // Closure
 (function(){
@@ -462,8 +480,10 @@ function stem() {
     var leafX,leafY,root;
     if (data_Y.active) {
 	root = Math.min(leaf_X.start,leaf_Y.start);
+	document.querySelector('#leaflabel').style.display = 'inline';
     } else {
 	root = leaf_X.start;
+	document.querySelector('#leaflabel').style.display = 'none';
     }
     var tblbdy = document.createElement('tbody');
     var nrow,ncell,ntxt;
@@ -475,6 +495,7 @@ function stem() {
 	if (data_Y.active) {
 	    ntxt = document.createTextNode(leafX || '');
 	    ncell.appendChild(ntxt);
+	    ncell.classList.add('second');
 	    ncell = nrow.insertCell(-1);
 	}
 	ntxt = document.createTextNode(root*10);
@@ -509,7 +530,7 @@ function clear(c) {
     c.restore();
 }
 
-drawAxes = function(c,lx,ux,s,w,o) {
+function drawAxes(c,lx,ux,s,w,o) {
     var height = c.canvas.height;
     c.beginPath();
     c.moveTo(0,10);
@@ -533,31 +554,37 @@ drawAxes = function(c,lx,ux,s,w,o) {
 }
 
 function plots() {
+    var lx,hx,s,vs;
     if (data_Y.active) {
-	hctx.canvas.height = "200";
+	hctx.canvas.height = "250";
+	lx = Math.min(0,data_X.offset,data_Y.offset);
+	hx = Math.max(data_X.last,data_Y.last)*values.classw;
+	s = Math.min(scale,hctx.canvas.width/((Math.max(data_X.last,data_Y.last))*values.classw));
+	vs =  Math.min(10/Math.ceil(Math.max.apply(null,data_X.bins)/10),10/Math.ceil(Math.max.apply(null,data_X.bins)/10));
     } else {
 	hctx.canvas.height = "100";
+	lx = Math.min(0,data_X.offset);
+	hx = data_X.last*values.classw;
+	s = Math.min(scale,hctx.canvas.width/(data_X.last*values.classw));
+	vs = 10/Math.ceil(Math.max.apply(null,data_X.bins)/10);
     }
-    clear(hctx);
-    var lx = Math.min(0,data_X.offset,data_Y.offset);
     offset = lx;
-    var hx = Math.max(data_X.last,data_Y.last)*values.classw;
-    var s = Math.min(scale,hctx.canvas.width/((Math.max(data_X.last,data_Y.last))*values.classw));
     ascale = s;
+    clear(hctx);
     hctx.save();
     hctx.translate(0,hctx.canvas.height);
     hctx.translate(10,-20);
-    hctx.translate(lx*s,0);
-    drawAxes(hctx,lx,hx,s,values.classw,values.classb);
-    data_X.draw_histogram(hctx,pos,s);
+    hctx.translate(-lx*s,0);
+    drawAxes(hctx,lx,hx,s,values.classw,offset);//values.classb);
+    data_X.draw_histogram(hctx,pos,s,vs);
 
     if (data_Y.active) {
 	hctx.translate(0,-hctx.canvas.height/2);
-	data_Y.draw_histogram(hctx,pos,s);
+	data_Y.draw_histogram(hctx,pos,s,vs);
     }
     hctx.restore();
     if (data_Y.active) {
-	bctx.canvas.height = "200";
+	bctx.canvas.height = "250";
     } else {
 	bctx.canvas.height = "100";
     }
@@ -565,8 +592,8 @@ function plots() {
     bctx.save();
     bctx.translate(0,hctx.canvas.height);
     bctx.translate(10,-20);
-    bctx.translate(lx*s,0);
-    drawAxes(bctx,lx,hx,s,values.classw,values.classb);
+    bctx.translate(-lx*s,0);
+    drawAxes(bctx,lx,hx,s,values.classw,offset);//values.classb);
     data_X.draw_boxplot(bctx);
     if (data_Y.active) {
 	bctx.translate(0,-bctx.canvas.height/2);

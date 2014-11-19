@@ -302,7 +302,7 @@
 	      Stem
 	    </th>
 	    <th id="rightleaf">
-	      <span class="second">Second</span> Leaf
+	      <span id="leaflabel" class="second">Second</span> Leaf
 	    </th>
 	  </tr>
 	  <tbody id="stemrows">
@@ -485,6 +485,73 @@
 	  </td>
 	</tr>
       </table>
+    </div>
+    <h3 class='second'><a href="#" class="arrow">&#9660;</a>Correlation</h3>
+    <div id='correlation' class='second'>
+      <math xmlns='http://www.w3.org/1998/Math/MathML'
+	    display='inline' id='corrmathml'>
+	<mrow>
+	  <mtable columnalign="right left right left
+						 right left right left
+						 right left"
+						     columnspacing="0em">
+	    <mtr>
+	      <mtd>
+		<msub>
+		  <mi>S</mi>
+		  <mrow>
+		    <mi>x</mi>
+		    <mi>x</mi>
+		  </mrow>
+		</msub>
+	      </mtd>
+	      <mtd>
+		<mo>=</mo>
+		<mn id='Sxx'>3</mn>
+	      </mtd>
+	    </mtr>
+	    <mtr>
+	      <mtd>
+		<msub>
+		  <mi>S</mi>
+		  <mrow>
+		    <mi>y</mi>
+		    <mi>y</mi>
+		  </mrow>
+		</msub>
+	      </mtd>
+	      <mtd>
+		<mo>=</mo>
+		<mn id='Syy'>4</mn>
+	      </mtd>
+	    </mtr>
+	    <mtr>
+	      <mtd>
+		<msub>
+		  <mi>S</mi>
+		  <mrow>
+		    <mi>x</mi>
+		    <mi>y</mi>
+		  </mrow>
+		</msub>
+	      </mtd>
+	      <mtd>
+		<mo>=</mo>
+		<mn id='Sxy'>5</mn>
+	      </mtd>
+	    </mtr>
+	    <mtr>
+	      <mtd>
+		<mi>r</mi>
+	      </mtd>
+	      <mtd>
+		<mo>=</mo>
+		<mn id='pmcc'>6</mn>
+	      </mtd>
+	    </mtr>
+	  </mtable>
+	</mrow>
+      </math>
     </div>
     <script type="text/javascript">
       setTimeout(init(),500);
