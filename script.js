@@ -4,19 +4,21 @@ var values = new Object();
 var data_X = new Data();
 var data_Y = new Data();
 var scale = 10;
+var ascale = scale;
+var offset = 0;
 
 var pos;
 var mouseClicked;
 
 function init() {
-    histogram = document.querySelector("#histogram");
+    var histogram = document.querySelector("#histogram");
     histogram.addEventListener("mousedown",doMouseDown,false);
     histogram.addEventListener("mouseup",doMouseUp,false);
     histogram.addEventListener("mouseout",doMouseOut,false);
     histogram.addEventListener("mousemove",doMouseMove,false);
     hctx = histogram.getContext("2d");
 
-    boxplot = document.querySelector("#boxplot");
+    var boxplot = document.querySelector("#boxplot");
     bctx = boxplot.getContext("2d");
 
     var elts = document.querySelector("#data_form").elements;
@@ -139,8 +141,10 @@ function getValues (redo) {
     data_Y.set_table(values.classb,values.classw);
 
     pos = data_X.median();
-    data_X.write_below('below',pos);
-    data_X.write_abelow('abelow',pos);
+    data_X.write_below('below_X',pos);
+    data_X.write_abelow('abelow_X',pos);
+    data_Y.write_below('below_Y',pos);
+    data_Y.write_abelow('abelow_Y',pos);
     document.querySelector('#mark').innerHTML = Math.floor(pos);
     
     data_X.write_mean('smean_X');
@@ -177,12 +181,43 @@ function getValues (redo) {
     data_Y.write('data_Y');
     data_Y.write_sorted('sdata_Y');
     // Frequency Table
-    data_X.write_table('freqrows');
+    var tblbdy = document.createElement('tbody');
+    var nrow,ncell,ntxt,bbin,tbin;
+    var bbin = Math.min(data_X.zero,data_Y.zero);
+    var tbin = Math.max(data_X.last,data_Y.last);
+    for (var i=bbin;i<tbin;i++) {
+	nrow = tblbdy.insertRow(-1);
+	ncell = nrow.insertCell(-1);
+	ntxt = document.createTextNode((i * values.classw) + values.classb);
+	ncell.appendChild(ntxt);
+	ncell = nrow.insertCell(-1);
+	ntxt = document.createTextNode(" \u2014 " + ((i+1) * values.classw + values.classb));
+	ncell.appendChild(ntxt);
+	ncell = nrow.insertCell(-1);
+	ncell.classList.add('first');
+	if (i < data_X.zero || i >=data_X.last) {
+	    nrow.classList.add('second');
+	}
+	ntxt = document.createTextNode(data_X.table_row(i));
+	ncell.appendChild(ntxt);
+	ncell = nrow.insertCell(-1);
+	ncell.classList.add('second');
+	if (i < data_Y.zero || i >=data_Y.last) {
+	    nrow.classList.add('first');
+	}
+	ntxt = document.createTextNode(data_Y.table_row(i));
+	ncell.appendChild(ntxt);
+    }
+    var otblbdy = document.querySelector('#freqrows');
+    var tbl = otblbdy.parentElement;
+    tbl.replaceChild(tblbdy,otblbdy);
+    tblbdy.id = 'freqrows';
+    
     // Stem and Leaf
-    data_X.write_stem('stemrows');
+    stem();
+    
     // Draw histogram and box plot
-    data_X.draw_histogram(hctx,pos);
-    data_X.draw_boxplot(bctx);
+    plots();
 
     return false;
 }
@@ -194,11 +229,13 @@ function getRelativeCoords(event) {
 
 function recalc(e) {
     var coords = getRelativeCoords(e);
-    pos = (coords.x - parseInt(window.getComputedStyle(hctx.canvas).marginLeft,10) - parseInt(window.getComputedStyle(hctx.canvas).marginRight,10) + data_X.offset)/data_X.scale;
-    data_X.write_below('below',pos);
-    data_X.write_abelow('abelow',pos);
+    pos = (coords.x - parseInt(window.getComputedStyle(hctx.canvas).marginLeft,10) - parseInt(window.getComputedStyle(hctx.canvas).marginRight,10) + offset)/ascale;
+    data_X.write_below('below_X',pos);
+    data_X.write_abelow('abelow_X',pos);
+    data_Y.write_below('below_Y',pos);
+    data_Y.write_abelow('abelow_Y',pos);
     document.querySelector('#mark').innerHTML = Math.floor(pos);
-    data_X.draw_histogram(hctx,pos);
+    plots();
 }
 
 function doMouseDown(e) {
@@ -383,6 +420,8 @@ function setCorrelation_aux(e) {
 
 function activateY(e) {
     activateY_aux(e.target);
+    stem();
+    plots();
 }
 
 function activateY_aux(e) {
@@ -401,7 +440,7 @@ function activateY_aux(e) {
     if (e.checked) {
 	vis = 'visible';
     } else {
-	vis = 'hidden';
+	vis = 'collapse';
     }
 
     for (var i=0; i< elts.length; i++) {
@@ -411,4 +450,128 @@ function activateY_aux(e) {
 
 function blank(id) {
     document.querySelector('#' + id).innerHTML = '';
+}
+
+function stem() {
+    var leaf_X,leaf_Y,side;
+    if (data_Y.active)
+	side = true;
+	
+    leaf_X = data_X.prepare_stem(side);
+    leaf_Y = data_Y.prepare_stem(!side);
+    var leafX,leafY,root;
+    if (data_Y.active) {
+	root = Math.min(leaf_X.start,leaf_Y.start);
+    } else {
+	root = leaf_X.start;
+    }
+    var tblbdy = document.createElement('tbody');
+    var nrow,ncell,ntxt;
+    leafX = leaf_X.leaves(root);
+    leafY = leaf_Y.leaves(root);
+    while (leafX !== false || leafY !== false) {
+	nrow = tblbdy.insertRow(-1);
+	ncell = nrow.insertCell(-1);
+	if (data_Y.active) {
+	    ntxt = document.createTextNode(leafX || '');
+	    ncell.appendChild(ntxt);
+	    ncell = nrow.insertCell(-1);
+	}
+	ntxt = document.createTextNode(root*10);
+	ncell.appendChild(ntxt);
+	ncell.classList.add('stem');
+	ncell = nrow.insertCell(-1);
+	if (data_Y.active) {
+	    ntxt = document.createTextNode(leafY || '');
+	} else {
+	    ntxt = document.createTextNode(leafX || '');
+	}	    
+	ncell.appendChild(ntxt);
+	root++;
+	leafX = leaf_X.leaves(root);
+	leafY = leaf_Y.leaves(root);
+    }
+    var otblbdy = document.querySelector('#stemrows');
+    var tbl = otblbdy.parentElement;
+    tbl.replaceChild(tblbdy,otblbdy);
+    tblbdy.id = 'stemrows';
+    if (!data_Y.active) {
+	document.querySelector('#leftleaf').style.display = 'none';
+    } else {
+	document.querySelector('#leftleaf').style.display = 'block';
+    }	
+}
+
+function clear(c) {
+    c.save();
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.clearRect(0, 0, c.canvas.width, c.canvas.height);
+    c.restore();
+}
+
+drawAxes = function(c,lx,ux,s,w,o) {
+    var height = c.canvas.height;
+    c.beginPath();
+    c.moveTo(0,10);
+    c.lineTo(0,-height + 10);
+    c.stroke();
+    c.beginPath();
+    c.moveTo(-10+lx*s,0);
+    c.lineTo(ux*s + 10,0);
+    c.stroke();
+    c.beginPath();
+    var tm;
+    c.fillStyle = 'black';
+    var nb = Math.ceil((ux-lx)/w);
+    for (var i=0; i<=nb;i++) {
+	c.moveTo((i*w+o)*s,0);
+	c.lineTo((i*w+o)*s,5);
+	tm = c.measureText(i*w+o);
+	c.fillText(i*w+o,(w*i+o)*s-tm.width/2,14);
+    }
+    c.stroke();
+}
+
+function plots() {
+    if (data_Y.active) {
+	hctx.canvas.height = "200";
+    } else {
+	hctx.canvas.height = "100";
+    }
+    clear(hctx);
+    var lx = Math.min(0,data_X.offset,data_Y.offset);
+    offset = lx;
+    var hx = Math.max(data_X.last,data_Y.last)*values.classw;
+    var s = Math.min(scale,hctx.canvas.width/((Math.max(data_X.last,data_Y.last))*values.classw));
+    ascale = s;
+    hctx.save();
+    hctx.translate(0,hctx.canvas.height);
+    hctx.translate(10,-20);
+    hctx.translate(lx*s,0);
+    drawAxes(hctx,lx,hx,s,values.classw,values.classb);
+    data_X.draw_histogram(hctx,pos,s);
+
+    if (data_Y.active) {
+	hctx.translate(0,-hctx.canvas.height/2);
+	data_Y.draw_histogram(hctx,pos,s);
+    }
+    hctx.restore();
+    if (data_Y.active) {
+	bctx.canvas.height = "200";
+    } else {
+	bctx.canvas.height = "100";
+    }
+    clear(bctx);
+    bctx.save();
+    bctx.translate(0,hctx.canvas.height);
+    bctx.translate(10,-20);
+    bctx.translate(lx*s,0);
+    drawAxes(bctx,lx,hx,s,values.classw,values.classb);
+    data_X.draw_boxplot(bctx);
+    if (data_Y.active) {
+	bctx.translate(0,-bctx.canvas.height/2);
+	data_Y.draw_boxplot(bctx);
+    }
+    bctx.restore();
+    
 }

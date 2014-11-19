@@ -55,7 +55,8 @@ Data.prototype.correlate = function(d,r) {
 }
 
 Data.prototype.set_table = function(o,w) {
-    var offset =  Math.floor((Math.min(0,this.sdata[0]) - o)/w)*w + o;
+    var offset =  Math.floor((this.sdata[0] - o)/w)*w + o;
+    this.zero = Math.floor((this.sdata[0] - o)/w);
     this.width = w;
     var bins = [];
 
@@ -69,6 +70,7 @@ Data.prototype.set_table = function(o,w) {
 	bins[i] = bins[i] || 0;
     }
     this.bins = bins;
+    this.last = bins.length + this.zero;
     this.offset = offset;
 }
 
@@ -82,6 +84,7 @@ Data.prototype.write_sorted = function(id) {
     this.set_field(id,datatxt);
 }
 
+/*
 Data.prototype.write_table = function(id) {
     var tblbdy = document.createElement('tbody');
     var nrow,ncell,ntxt,bbin,tbin;
@@ -94,6 +97,7 @@ Data.prototype.write_table = function(id) {
 	}
     }
     tbin += 1;
+    console.log(this.bins.length,bbin,tbin);
     for (var i=bbin;i<tbin;i++) {
 	nrow = tblbdy.insertRow(i - bbin);
 	ncell = nrow.insertCell(0);
@@ -111,7 +115,19 @@ Data.prototype.write_table = function(id) {
     tbl.replaceChild(tblbdy,otblbdy);
     tblbdy.id = id;
 }
+*/
 
+Data.prototype.table_row = function(i) {
+    var str;
+    if (i >= this.zero && i < this.last) {
+	str = this.bins[i-this.zero];
+    } else {
+	str = "0";
+    }
+    return str;
+}
+
+/*
 Data.prototype.write_stem = function(id) {
     var sdata = this.data.map(function(v) {return Math.floor(v+.5)});
     sdata.sort(compareNumbers);
@@ -140,6 +156,29 @@ Data.prototype.write_stem = function(id) {
     tbl.replaceChild(tblbdy,otblbdy);
     tblbdy.id = id;
 }
+*/
+
+Data.prototype.prepare_stem = function(r) {
+    var sdata = this.sdata.map(function(v) {return Math.floor(v + .5)});
+    var i = 0;
+    var st = Math.floor(sdata[0]/10);
+    var self = this;
+    return {start: st,leaves: function(s) {
+	if (i >= sdata.length || !self.active) {
+	    return false;
+	}
+	var leaf = [];
+	while (i < sdata.length && Math.floor(sdata[i]/10) == s) {
+	    leaf.push(sdata[i] - s*10);
+	    i++;
+	}
+	if (r)
+	    leaf.reverse();
+	return leaf.join([separator = ' ']);
+    }
+	   };
+	    
+}
 
 Data.prototype.write_below = function(id,p) {
     var n = 0;
@@ -154,11 +193,13 @@ Data.prototype.write_below = function(id,p) {
 Data.prototype.write_abelow = function(id,p) {
     var n = 0;
     var abelow;
-    var x = Math.floor((p-this.offset)/this.width);
-    if (x < this.bins.length) {
-	abelow = (p/this.width - x)*this.bins[x];
-	for (var i=0;i<x;i++) {
-	    abelow += this.bins[i];
+    var x = Math.floor(p/this.width);
+    if (x < this.zero) {
+	abelow = 0;
+    } else if (x < this.last) {
+	abelow = (p/this.width - x)*this.bins[x-this.zero];
+	for (var i=this.zero;i<x;i++) {
+	    abelow += this.bins[i-this.zero];
 	}
     } else {
 	abelow = this.data.length;
@@ -357,64 +398,64 @@ Data.prototype.write_mode = function(id) {
     this.set_field(id,str);
 }
 
-Data.prototype.draw_histogram = function(ctx,pos) {
+Data.prototype.draw_histogram = function(ctx,pos,scale) {
     var hbin = 10/Math.ceil(Math.max.apply(null,this.bins)/10);
-    this.scale = Math.min(scale,ctx.canvas.width/((this.bins.length+1)*this.width + this.offset));
     var tm;
-    clear(ctx);
     ctx.save();
-    ctx.translate(0,ctx.canvas.height);
+/*    ctx.translate(0,ctx.canvas.height);
     ctx.translate(10,-20);
-    ctx.translate(-this.offset*this.scale,0);
-    this.drawAxes(ctx,true);
+    ctx.translate(-this.offset*scale,0);
+//    this.drawAxes(ctx,true);
+*/
     ctx.strokeStyle = "black";
     for (var i=0; i<this.bins.length;i++) {
 	ctx.fillStyle = 'gray';
-	ctx.fillRect((i*this.width+this.offset)*this.scale,0,this.width*this.scale,-this.bins[i]*hbin);
+	ctx.fillRect((i*this.width+this.offset)*scale,0,this.width*scale,-this.bins[i]*hbin);
 	if (this.bins[i] != 0) {
 	    tm = ctx.measureText(this.bins[i]);
 	    ctx.fillStyle = 'black';
-	    ctx.fillText(this.bins[i],(this.width*(i+.5)+this.offset)*this.scale-tm.width/2,-10);
+	    ctx.fillText(this.bins[i],(this.width*(i+.5)+this.offset)*scale-tm.width/2,-10);
 	}
     }
     ctx.fillStyle = 'blue';
     this.data.forEach(
 	function(x) {
-	    mark(ctx,x*this.scale,-60);
+	    mark(ctx,x*scale,-60);
 	}
     );
     ctx.fillStyle = 'red';
     for (var i=0; i<this.bins.length; i++) {
 	for (var j=0; j<this.bins[i]; j++) {
-	    mark(ctx,(this.width*i+this.offset)*this.scale + (j+.5)*this.scale*this.width/this.bins[i],-70);
+	    mark(ctx,(this.width*i+this.offset)*scale + (j+.5)*scale*this.width/this.bins[i],-70);
 	}
     }
     ctx.strokeStyle = "red";
     ctx.beginPath();
-    ctx.moveTo(pos*this.scale,0);
+    ctx.moveTo(pos*scale,0);
 
-    ctx.lineTo(pos*this.scale,-100);
+    ctx.lineTo(pos*scale,-100);
     ctx.stroke();
     ctx.restore();
 }
 
 Data.prototype.draw_boxplot = function(ctx) {
-    clear(ctx);
-    ctx.save()
+/*    clear(ctx);
     ctx.translate(0,ctx.canvas.height);
     ctx.translate(10,-20);
-    ctx.translate(-this.offset*this.scale,0);
+    ctx.translate(-this.offset*scale,0);
     this.drawAxes(ctx);
+*/
+    ctx.save()
     var md = this.median();
     var lq = this.lowerquartile();
     var uq = this.upperquartile();
     var iq = uq - lq;
     ctx.fillStyle = 'gray';
-    ctx.fillRect(lq*this.scale,-10,iq*this.scale,-40);
+    ctx.fillRect(lq*scale,-10,iq*scale,-40);
     ctx.beginPath();
     ctx.strokeStyle = 'red';
-    ctx.moveTo(md*this.scale,-10);
-    ctx.lineTo(md*this.scale,-50);
+    ctx.moveTo(md*scale,-10);
+    ctx.lineTo(md*scale,-50);
     ctx.stroke();
     var lf = md - 1.5*iq;
     var uf = md + 1.5*iq;
@@ -428,21 +469,21 @@ Data.prototype.draw_boxplot = function(ctx) {
     });
     ctx.beginPath();
     ctx.strokeStyle = 'black';
-    ctx.moveTo(lq*this.scale,-30);
-    ctx.lineTo(lw*this.scale,-30);
-    ctx.moveTo(lw*this.scale,-50);
-    ctx.lineTo(lw*this.scale,-10);
-    ctx.moveTo(uq*this.scale,-30);
-    ctx.lineTo(uw*this.scale,-30);
-    ctx.moveTo(uw*this.scale,-50);
-    ctx.lineTo(uw*this.scale,-10);
+    ctx.moveTo(lq*scale,-30);
+    ctx.lineTo(lw*scale,-30);
+    ctx.moveTo(lw*scale,-50);
+    ctx.lineTo(lw*scale,-10);
+    ctx.moveTo(uq*scale,-30);
+    ctx.lineTo(uw*scale,-30);
+    ctx.moveTo(uw*scale,-50);
+    ctx.lineTo(uw*scale,-10);
     ctx.stroke();
     this.data.forEach(function(x) {
 	ctx.fillStyle = 'blue';
-	mark(ctx,x*this.scale,-60);
+	mark(ctx,x*scale,-60);
 	ctx.fillStyle = 'black';
 	if ((x < lw) || (x > uw))
-	    mark(ctx,x*this.scale,-30);
+	    mark(ctx,x*scale,-30);
     });
     ctx.restore();
 }
@@ -466,26 +507,19 @@ Data.prototype.drawAxes = function(c,uo) {
     c.lineTo(0,-height + 10);
     c.stroke();
     c.beginPath();
-    c.moveTo(-10+this.offset*this.scale,0);
-    c.lineTo((this.bins.length*this.width + this.offset)*this.scale + 10,0);
+    c.moveTo(-10+this.offset*scale,0);
+    c.lineTo((this.bins.length*this.width + this.offset)*scale + 10,0);
     c.stroke();
     c.beginPath();
     var tm;
     c.fillStyle = 'black';
     for (var i=0; i<=this.bins.length;i++) {
-	c.moveTo((i*this.width+o)*this.scale,0);
-	c.lineTo((i*this.width+o)*this.scale,5);
+	c.moveTo((i*this.width+o)*scale,0);
+	c.lineTo((i*this.width+o)*scale,5);
 	tm = c.measureText(i*this.width+o);
-	c.fillText(i*this.width+o,(this.width*i+o)*this.scale-tm.width/2,14);
+	c.fillText(i*this.width+o,(this.width*i+o)*scale-tm.width/2,14);
     }
     c.stroke();
-}
-
-function clear(c) {
-    c.save();
-    c.setTransform(1, 0, 0, 1, 0, 0);
-    c.clearRect(0, 0, c.canvas.width, c.canvas.height);
-    c.restore();
 }
 
 var compareNumbers = function(a,b) {

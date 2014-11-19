@@ -267,8 +267,18 @@
 	    <th colspan='2'>
 	      Class Interval
 	    </th>
-	    <th>
+	    <th colspan='2'>
 	      Frequency
+	    </th>
+	  </tr>
+	  <tr>
+	    <th colspan='2'>
+	    </th>
+	    <th class='first'>
+	      First
+	    </th>
+	    <th class='second'>
+	      Second
 	    </th>
 	  </tr>
 	</thead>
@@ -285,11 +295,14 @@
       <table id="stem">
 	<thead>
 	  <tr>
+	    <th class="second" id="leftleaf">
+	      First Leaf
+	    </th>
 	    <th>
 	      Stem
 	    </th>
-	    <th>
-	      Leaf
+	    <th id="rightleaf">
+	      <span class="second">Second</span> Leaf
 	    </th>
 	  </tr>
 	  <tbody id="stemrows">
@@ -309,19 +322,35 @@
 	  </td>
 	</tr>
 	<tr>
-	  <td>
-	    Points below mark:
+	  <td class="first">
+	    Points from first sample below mark:
 	  </td>
 	  <td>
-	    <span id="below"></span>
+	    <span id="below_X" class="first"></span>
 	  </td>
 	</tr>
 	<tr>
-	  <td>
-	    Approximate points below mark:
+	  <td class="first">
+	    Approximate points from first sample below mark:
 	  </td>
 	  <td>
-	    <span id="abelow"></span>
+	    <span id="abelow_X" class="first"></span>
+	  </td>
+	</tr>
+	<tr>
+	  <td class="second">
+	    Points from second sample below mark:
+	  </td>
+	  <td>
+	    <span id="below_Y" class="second"></span>
+	  </td>
+	</tr>
+	<tr>
+	  <td class="second">
+	    Approximate points from second sample below mark:
+	  </td>
+	  <td>
+	    <span id="abelow_Y" class="second"></span>
 	  </td>
 	</tr>
       </table>
