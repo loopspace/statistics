@@ -482,6 +482,7 @@ function activateY(e) {
     activateY_aux(e.target);
     stem();
     plots();
+    scatter();
 }
 
 function activateY_aux(e) {
