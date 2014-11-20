@@ -100,8 +100,10 @@ function getValues (redo) {
 	    values[element.name] = x;
 	}
 	if (element.type === 'checkbox') {
-	    redo = true;
-	    values[element.name] = element.checked;
+	    x = element.checked;
+	    if (x != values[element.name])
+		redo = true;
+	    values[element.name] = x;
 	}
     }
     var elts = document.querySelector("#class_form").elements;
@@ -436,6 +438,7 @@ function toggle_div(e) {
 
 function setCorrelation(e) {
     setCorrelation_aux(e.target);
+    getValues();
 }
 
 function setCorrelation_aux(e) {
@@ -457,6 +460,7 @@ function setCorrelation_aux(e) {
 
 function setCoding(e) {
     setCoding_aux(e.target);
+    getValues();
 }
 
 
