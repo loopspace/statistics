@@ -44,11 +44,9 @@ Data.prototype.enable = function(b) {
 }
 
 Data.prototype.correlate = function(d,r) {
-    console.log(r);
     var r = r || 0;
     r = Math.max(Math.min(r,1),-1);
     var s = Math.sqrt(1 - r*r);
-    console.log(r,s);
     var data = [];
     for (var i=0; i< this.gdata.length; i++) {
 	data.push(s * this.gdata[i] + r * d.gdata[i]);

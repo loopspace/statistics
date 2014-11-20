@@ -1,5 +1,6 @@
 var hctx;
 var bctx;
+var sctx;
 var values = new Object();
 var data_X = new Data();
 var data_Y = new Data();
@@ -21,6 +22,9 @@ function init() {
     var boxplot = document.querySelector("#boxplot");
     bctx = boxplot.getContext("2d");
 
+    var scatterplot = document.querySelector('#scatter');
+    sctx = scatterplot.getContext('2d');
+    
     var elts = document.querySelector("#data_form").elements;
     for (var i=0, element; element = elts[i++];) {
 	if (element.type === "text")
@@ -37,6 +41,10 @@ function init() {
     correlate.onchange = setCorrelation;
     setCorrelation_aux(correlate);
 
+    var coding = document.querySelector('#coding');
+    coding.onchange = setCoding;
+    setCoding_aux(coding);
+
     var enable = document.querySelector('#enable_Y');
     enable.onchange = activateY;
     activateY_aux(enable);
@@ -51,6 +59,7 @@ function init() {
     
     setSize(histogram);
     setSize(boxplot);
+    setSize(scatterplot);
     getValues();
 }
 
@@ -102,7 +111,7 @@ function getValues (redo) {
     }
     values.number_X = parseInt(values.number_X,10);
     values.number_Y = parseInt(values.number_Y,10);
-    if (values.correlate) {
+    if (values.correlate || values.coding) {
 	values.number_Y = values.number_X;
 	values.type_Y = values.type_X;
 	values.distribution_Y = values.distribution_X;
@@ -139,7 +148,13 @@ function getValues (redo) {
     data_X.initialise();
     data_X.set_table(values.classb,values.classw);
 
-    data_Y.add_data(values.edata_Y||[]);
+    if (values.coding) {
+	var d = [];
+	data_X.data.forEach (function (x) { d.push(values.coding_a * x + values.coding_b) });
+	data_Y.data = d;
+    } else {
+	data_Y.add_data(values.edata_Y||[]);
+    }
     data_Y.initialise();
     data_Y.set_table(values.classb,values.classw);
 
@@ -213,13 +228,11 @@ function getValues (redo) {
 	ncell.classList.add('first');
 	if (i < data_X.zero || i >=data_X.last) {
 	    nrow.classList.add('second');
-	    nrow.style.visibility = vis;
 	}
 	ntxt = document.createTextNode(data_X.table_row(i));
 	ncell.appendChild(ntxt);
 	ncell = nrow.insertCell(-1);
 	ncell.classList.add('second');
-	ncell.style.visibility = vis;
 	if (i < data_Y.zero || i >=data_Y.last) {
 	    nrow.classList.add('first');
 	}
@@ -237,6 +250,9 @@ function getValues (redo) {
     // Draw histogram and box plot
     plots();
 
+    // Correlation graph
+    if (data_Y.active)
+	scatter();
     return false;
 }
 
@@ -428,11 +444,37 @@ function setCorrelation_aux(e) {
 	document.getElementsByName('type_Y')[0].disabled = true;
 	document.getElementsByName('number_Y')[0].disabled = true;
 	document.getElementsByName('correlation')[0].disabled = false;
+	document.getElementsByName('coding_a')[0].disabled = true;
+	document.getElementsByName('coding_b')[0].disabled = true;
+	document.getElementsByName('coding')[0].checked = false;
     } else {
 	document.getElementsByName('distribution_Y')[0].disabled = false;
 	document.getElementsByName('type_Y')[0].disabled = false;
 	document.getElementsByName('number_Y')[0].disabled = false;
 	document.getElementsByName('correlation')[0].disabled = true;
+    }
+}
+
+function setCoding(e) {
+    setCoding_aux(e.target);
+}
+
+
+function setCoding_aux(e) {
+    if (e.checked) {
+	document.getElementsByName('distribution_Y')[0].disabled = true;
+	document.getElementsByName('type_Y')[0].disabled = true;
+	document.getElementsByName('number_Y')[0].disabled = true;
+	document.getElementsByName('correlation')[0].disabled = true;
+	document.getElementsByName('coding_a')[0].disabled = false;
+	document.getElementsByName('coding_b')[0].disabled = false;
+	document.getElementsByName('correlate')[0].checked = false;
+    } else {
+	document.getElementsByName('distribution_Y')[0].disabled = false;
+	document.getElementsByName('type_Y')[0].disabled = false;
+	document.getElementsByName('number_Y')[0].disabled = false;
+	document.getElementsByName('coding_a')[0].disabled = true;
+	document.getElementsByName('coding_b')[0].disabled = true;
     }
 }
 
@@ -452,18 +494,19 @@ function activateY_aux(e) {
     document.getElementsByName('edata_Y')[0].disabled = !e.checked;
     document.getElementsByName('correlate')[0].disabled = !e.checked;
     document.getElementsByName('correlation')[0].disabled = !e.checked;
+    document.getElementsByName('coding')[0].disabled = !e.checked;
+    document.getElementsByName('coding_a')[0].disabled = !e.checked;
+    document.getElementsByName('coding_b')[0].disabled = !e.checked;
 
     var elts = document.getElementsByClassName('second');
     var vis;
     if (e.checked) {
-	vis = 'visible';
+	vis = '';
     } else {
-	vis = 'collapse';
+	vis = 'none';
     }
-
-    for (var i=0; i< elts.length; i++) {
-	elts[i].style.visibility = vis;
-    }
+    for (var i=0, elt; elt = elts[i]; i++)
+	elt.style.display = vis;
 }
 
 function blank(id) {
@@ -601,4 +644,49 @@ function plots() {
     }
     bctx.restore();
     
+}
+
+function scatter() {
+    var lx,hx,s;
+    lx = Math.min(0,data_X.offset,data_Y.offset);
+    hx = Math.max(data_X.last,data_Y.last)*values.classw;
+    s = Math.min(scale,sctx.canvas.width/((Math.max(data_X.last,data_Y.last))*values.classw));
+    sctx.canvas.height = s*(hx-lx)+40;
+    
+    sctx.save();
+    sctx.translate(0,sctx.canvas.height);
+    sctx.translate(20,-20);
+    sctx.translate(-lx*s,-lx*s);
+
+    var height = sctx.canvas.height;
+    sctx.beginPath();
+    sctx.moveTo(0,10+lx*s);
+    sctx.lineTo(0,-hx*s - 10);
+    sctx.stroke();
+    sctx.beginPath();
+    sctx.moveTo(-10+lx*s,0);
+    sctx.lineTo(hx*s + 10,0);
+    sctx.stroke();
+    sctx.beginPath();
+    var tm;
+    var w = values.classw;
+    var o = values.classb;
+    sctx.fillStyle = 'black';
+    var nb = Math.ceil((hx-lx)/w);
+    for (var i=0; i<=nb;i++) {
+	sctx.moveTo((i*w+o)*s,0);
+	sctx.lineTo((i*w+o)*s,5);
+	tm = sctx.measureText(i*w+o);
+	sctx.fillText(i*w+o,(w*i+o)*s-tm.width/2,14);
+    }
+    for (var i=0; i<=nb;i++) {
+	sctx.moveTo(0,-(i*w+o)*s);
+	sctx.lineTo(-5,-(i*w+o)*s);
+	tm = sctx.measureText(i*w+o);
+	sctx.fillText(i*w+o,-14-tm.width/2,-(w*i+o)*s);
+    }
+    sctx.stroke();
+    for (var i=0; i < data_X.data.length; i++) {
+	mark(sctx,s*data_X.data[i],-s*data_Y.data[i]);
+    }
 }
