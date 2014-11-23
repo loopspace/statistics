@@ -95,3 +95,18 @@ canvas {
 body {
     margin-bottom: 40px;
 }
+
+.data {
+    padding: 10px;
+}
+
+.quantile {
+    width: 2em;
+}
+
+.plus {
+    border-radius: 15px;
+    background: #ccc;
+    margin-right: 2px;
+    float: left;
+}

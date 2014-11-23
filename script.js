@@ -26,17 +26,12 @@ function init() {
     var scatterplot = document.querySelector('#scatter');
     sctx = scatterplot.getContext('2d');
     
-    var elts = document.querySelector("#data_form").elements;
+    var elts = document.querySelector("#form").elements;
     for (var i=0, element; element = elts[i++];) {
 	if (element.type === "text")
     	    element.onkeypress = checkReturn;
 	if (element.type === "select-one")
     	    element.onchange = getValues;
-    }
-    elts = document.querySelector("#class_form").elements;
-    for (var i=0, element; element = elts[i++];) {
-	if (element.type === "text")
-    	    element.onkeypress = checkReturn;
     }
     var correlate = document.querySelector('#correlate');
     correlate.onchange = setCorrelation;
@@ -56,6 +51,9 @@ function init() {
     
     var button = document.querySelector("#reset");
     button.onclick = function() {getValues(true); return false;};
+    var plus = document.querySelector('#add_1');
+    plus.onclick = function(e) {addQuantile(e.target);
+	return false;};
     
     elts = document.getElementsByClassName('arrow');
     for (var i=0, element; element = elts[i++];) {
@@ -70,7 +68,7 @@ function init() {
 
 
 function getValues (redo) {
-    var elts = document.querySelector("#data_form").elements;
+    var elts = document.querySelector("#form").elements;
     var redo = redo || false;
     var x;
     var ndarr = [];
@@ -78,7 +76,9 @@ function getValues (redo) {
     for (var i=0, element; element = elts[i++];) {
 	ename = element.name.substring(0,element.name.indexOf('_'));
 	if (element.type === "text") {
-	    if (ename === "edata") {
+	    if (element.name === "classes") {
+		values[element.name] = element.value.toString();
+	    } else if (ename === "edata") {
 		if (element.value != '') {
 		    ndarr = element.value.split(/\s*[\s,;]+\s*/);
 		    ndarr = ndarr.map(function(d) {return parseFloat(d)});
@@ -106,22 +106,12 @@ function getValues (redo) {
 	}
 	if (element.type === 'checkbox') {
 	    x = element.checked;
-	    if (x != values[element.name])
+	    if (x != values[element.name] && element.name != 'even')
 		redo = true;
 	    values[element.name] = x;
 	}
     }
 
-    var elts = document.querySelector("#class_form").elements;
-    for (var i=0, element; element = elts[i++];) {
-	if (element.name === "classes") {
-	    values[element.name] = element.value.toString();
-	} else if (element.type === "text") {
-	    values[element.name] = parseFloat(element.value);
-	} else if (element.type === "checkbox") {
-	    values[element.name] = element.checked;
-	}
-    }
     values.number_X = parseInt(values.number_X,10);
     values.number_Y = parseInt(values.number_Y,10);
     if (values.correlate || values.coding) {
@@ -224,7 +214,6 @@ function getValues (redo) {
 	} else {
 	    bins.push({labelpre: Math.floor(lv).toString(), labelpost: ' \u2014 ' + Math.ceil(hv+.1), lower: Math.floor(lv), upper: Math.ceil(hv+.1)});
 	}
-	console.log(bins);
     }
     data_X.set_table(bins);
     data_Y.set_table(bins);
@@ -275,6 +264,32 @@ function getValues (redo) {
     data_Y.write_binupperquartile('sbupq_Y',bins);
     data_Y.write_bininterquartilerange('sbiqrange_Y',bins);
 
+    var elts = document.getElementsByClassName('quantiles');
+    var ch,k,n,m,idb;
+    for (var i = 0; i < elts.length; i++) {
+	ch = elts[i].children;
+	k = '';
+	n = '';
+	m = elts[i].parentElement.id.substring(elts[i].parentElement.id.indexOf('_')+1);
+	for (var j = 0; j < ch.length; j++) {
+	    if (ch[j].tagName.toLowerCase() == 'input') {
+		if (ch[j].value) {
+		    if (ch[j].id.substring(0,ch[j].id.indexOf('_')) == 'kth') {
+			k = parseInt(ch[j].value,10);
+		    } else if (ch[j].id.substring(0,ch[j].id.indexOf('_')) == 'nth') {
+			n = parseInt(ch[j].value,10);
+		    }
+		}
+	    }
+	}
+	if (k != '' && n != '') {
+	    data_X.write_ntile('quantile_' + m + '_X',k,n);
+	    data_Y.write_ntile('quantile_' + m + '_Y',k,n);
+	    data_X.write_entile('equantile_' + m + '_X',k,n,bins);
+	    data_Y.write_entile('equantile_' + m + '_Y',k,n,bins);
+	}
+    }
+    
     data_Y.write('data_Y');
     data_Y.write_sorted('sdata_Y');
 
@@ -372,65 +387,6 @@ function checkReturn(e) {
     }
 }
 
-/*
-function mode (b) {
-    var i = -1;
-    var n = 0;
-    for (var j=0; j < b.length; j++) {
-	if (b[j] > n) {
-	    i = j;
-	    n = b[j];
-	}
-    }
-    return i;
-}
-
-function binlowerquartile (b) {
-    var n = 0;
-    for (var j = 0; j < b.length; j++) {
-	n += b[j];
-    }
-    n = n/4;
-    var m = 0;
-    for (var j = 0; j < b.length; j++) {
-	if (m + b[j] > n) {
-	    return j + (n - m)/b[j];
-	}
-	m += b[j];
-    }
-}
-
-function binmedian (b) {
-    var n = 0;
-    for (var j = 0; j < b.length; j++) {
-	n += b[j];
-    }
-    n = n/2;
-    var m = 0;
-    for (var j = 0; j < b.length; j++) {
-	if (m + b[j] > n) {
-	    return j + (n - m)/b[j];
-	}
-	m += b[j];
-    }
-}
-
-function binupperquartile (b) {
-    var n = 0;
-    for (var j = 0; j < b.length; j++) {
-	n += b[j];
-    }
-    n = 3*n/4;
-    var m = 0;
-    for (var j = 0; j < b.length; j++) {
-	if (m + b[j] > n) {
-	    return j + (n - m)/b[j];
-	}
-	m += b[j];
-    }
-}
-
-*/
 // Copied from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
 // Closure
 (function(){
@@ -780,4 +736,58 @@ function scatter() {
     for (var i=0; i < data_X.data.length; i++) {
 	mark(sctx,s*data_X.data[i],-s*data_Y.data[i]);
     }
+}
+
+function addQuantile(e) {
+    while (e && e.tagName.toLowerCase() !== 'tbody') {
+	e = e.parentElement;
+    }
+    var lrow = e.rows[e.rows.length-2].id;
+    var n = parseInt(lrow.substring(lrow.indexOf('_')+1),10);
+    console.log(e.rows);
+    n++;
+    var nrow = e.insertRow(-1);
+    nrow.id = 'quantile_' + n;
+    var ncell = nrow.insertCell(-1);
+    ncell.classList.add('quantiles');
+/*    var elt = document.createElement('button');
+    elt.id = 'add_' + n;
+    elt.textContent = '+';
+    elt.classList.add('plus');
+    elt.setAttribute('form','form');
+    elt.setAttribute('name','add_' + n);
+    elt.onclick = function(e) {addQuantile(e.target);
+	return false;};
+    ncell.appendChild(elt);
+*/
+    var elt = document.createElement('input');
+    elt.id = 'kth_' + n;
+    elt.setAttribute('type','text');
+    elt.setAttribute('form','form');
+    elt.classList.add('quantile');
+    elt.onkeypress = checkReturn;
+    ncell.appendChild(elt);
+    elt = document.createTextNode('th quantile of\u0020');
+    ncell.appendChild(elt);
+    elt = document.createElement('input');
+    elt.id = 'nth_' + n;
+    elt.setAttribute('type','text');
+    elt.setAttribute('form','form');
+    elt.classList.add('quantile');
+    elt.onkeypress = checkReturn;
+    ncell.appendChild(elt);
+    ncell = nrow.insertCell(-1);
+    ncell.id = 'quantile_' + n + '_X';
+    ncell = nrow.insertCell(-1);
+    ncell.id = 'quantile_' + n + '_Y';
+    ncell.classList.add('second');
+    nrow = e.insertRow(-1);
+    ncell = nrow.insertCell(-1);
+    elt = document.createTextNode('Estimate:');
+    ncell.appendChild(elt);
+    ncell = nrow.insertCell(-1);
+    ncell.id = 'equantile_' + n + '_X';
+    ncell = nrow.insertCell(-1);
+    ncell.id = 'equantile_' + n + '_Y';
+    ncell.classList.add('second');
 }

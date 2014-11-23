@@ -319,6 +319,11 @@ Data.prototype.ntile = function(k,n) {
     }
 }
 
+Data.prototype.write_ntile = function(id,k,n) {
+    this.set_field(id,Math.round10(this.ntile(k,n),precision));
+}
+
+
 Data.prototype.median = function(id) {
     if (this.stats.median) {
 	return this.stats.median;
@@ -376,6 +381,10 @@ Data.prototype.entile = function(k,n,b) {
 	}
     }
     return b[x].lower + l/this.bins[x]*(b[x].upper - b[x].lower);
+}
+
+Data.prototype.write_entile = function(id,k,n,b) {
+    this.set_field(id,Math.round10(this.entile(k,n,b),precision));
 }
 
 Data.prototype.binlowerquartile = function(b) {
@@ -553,10 +562,10 @@ Data.prototype.draw_boxplot = function(ctx) {
     ctx.moveTo(md*scale,-10);
     ctx.lineTo(md*scale,-50);
     ctx.stroke();
-    var lf = md - 1.5*iq;
-    var uf = md + 1.5*iq;
-    var lw = md;
-    var uw = md;
+    var lf = lq - 1.5*iq;
+    var uf = uq + 1.5*iq;
+    var lw = lq;
+    var uw = uq;
     this.data.forEach(function(x) {
 	if (x > lf)
 	    lw = Math.min(lw,x);
