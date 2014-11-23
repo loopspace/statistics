@@ -17,6 +17,20 @@
 	  <table class="text">
 	    <tr>
 	      <td>
+		<label for="type">
+		  Data type:
+		</label>
+	      </td>
+	      <td>
+		<select name="type">
+		  <option value="continuous">Continuous</option>
+		  <option value="discrete">Discrete</option>
+		  <option value="rounded">Continuous but rounded</option>
+		</select>
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
 		<label for="distribution_X">
 		  Distribution:
 		</label>
@@ -27,19 +41,7 @@
 		  <option value="exponential">Exponential</option>
 		  <option value="uniform">Uniform</option>
 		</select>
-	    </tr>
-	    <tr>
-	      <td>
-		<label for="type_X">
-		  Data type:
-		</label>
 	      </td>
-	      <td>
-		<select name="type_X">
-		  <option value="continuous">Continuous</option>
-		  <option value="discrete">Discrete</option>
-		  <option value="rounded">Continuous but rounded</option>
-		</select>
 	    </tr>
 	    <tr>
 	      <td>
@@ -109,19 +111,7 @@
 		  <option value="exponential">Exponential</option>
 		  <option value="uniform">Uniform</option>
 		</select>
-	    </tr>
-	    <tr>
-	      <td>
-		<label for="type_Y">
-		  Data type:
-		</label>
 	      </td>
-	      <td>
-		<select name="type_Y">
-		  <option value="continuous">Continuous</option>
-		  <option value="discrete">Discrete</option>
-		  <option value="rounded">Continuous but rounded</option>
-		</select>
 	    </tr>
 	    <tr>
 	      <td>
@@ -260,6 +250,17 @@
 	<table class="text">
 	  <tr>
 	    <td>
+	      <label for="even">
+		Even class intervals:
+	      </label>
+	    </td>
+	    <td>
+	      <input type="checkbox" name="even" id="even" checked="1"
+		     value="">
+	    </td>
+	  </tr>
+	  <tr>
+	    <td>
 	      <label for="classb">
 		Class offset:
 	      </label>
@@ -276,6 +277,16 @@
 	    </td>
 	    <td>
 	      <input type="text" name="classw" id="classw" value="10">
+	    </td>
+	  </tr>
+	  <tr>
+	    <td>
+	      <label for="classes">
+		Class endpoints:
+	      </label>
+	    </td>
+	    <td>
+	      <input type="text" name="classes" id="classes" value="">
 	    </td>
 	  </tr>
 	  <tr>
@@ -419,7 +430,7 @@
 	</tr>
 	<tr>
 	  <td>
-	    Modal class:
+	    <span class="cts">Modal class</span><span class="discrete">Mode</span>:
 	  </td>
 	  <td id="smode_X" class="first">
 	  </td>

@@ -54,24 +54,35 @@ Data.prototype.correlate = function(d,r) {
     this.gdata = data;
 }
 
-Data.prototype.set_table = function(o,w) {
-    var offset =  Math.floor((this.sdata[0] - o)/w)*w + o;
-    this.zero = Math.floor((this.sdata[0] - o)/w);
-    this.width = w;
+Data.prototype.set_table = function(b) {
     var bins = [];
-
-    var x;
-    this.data.forEach( function(y) {
-	x = Math.floor((y - offset)/w)
-	bins[x] = (bins[x] || 0) + 1;
-    });
-
-    for (var i=0;i<bins.length;i++) {
-	bins[i] = bins[i] || 0;
+    var i = 0;
+    var j = 0;
+    var n = 0;
+    var l = b.length;
+    var t = 0;
+    while (i < b.length && j < this.sdata.length) {
+	if (this.sdata[j] < b[i].upper) {
+	    n++;
+	    j++;
+	} else {
+	    if (n != 0) {
+		l = Math.min(l,i);
+		t = Math.max(t,i);
+	    }
+	    bins[i] = n;
+	    i++;
+	    n=0;
+	}
     }
+    if (n != 0) {
+	l = Math.min(l,i);
+	t = Math.max(t,i);
+    }
+    bins[i] = n;
     this.bins = bins;
-    this.last = bins.length + this.zero;
-    this.offset = offset;
+    this.first = l;
+    this.last = t;
 }
 
 Data.prototype.write = function(id) {
@@ -118,13 +129,11 @@ Data.prototype.write_table = function(id) {
 */
 
 Data.prototype.table_row = function(i) {
-    var str;
-    if (i >= this.zero && i < this.last) {
-	str = this.bins[i-this.zero];
+    if (i >= this.first && i <= this.last) {
+	return this.bins[i];
     } else {
-	str = "0";
+	return '0';
     }
-    return str;
 }
 
 /*
@@ -190,19 +199,26 @@ Data.prototype.write_below = function(id,p) {
     this.set_field(id,n);
 }
 
-Data.prototype.write_abelow = function(id,p) {
+Data.prototype.write_abelow = function(id,p,b) {
     var n = 0;
-    var abelow;
-    var x = Math.floor(p/this.width);
-    if (x < this.zero) {
+    var abelow; 
+    if (p < b[0].lower) {
 	abelow = 0;
-    } else if (x < this.last) {
-	abelow = (p/this.width - x)*this.bins[x-this.zero];
-	for (var i=this.zero;i<x;i++) {
-	    abelow += this.bins[i-this.zero];
-	}
-    } else {
+    } else if (p > b[b.length-1].upper) {
 	abelow = this.data.length;
+    } else {
+	var x = 0;
+	var m = 0;
+	for (var i=0; i < b.length; i++) {
+	    if (p >= b[i].upper) {
+		m += this.bins[i];
+	    } else if (p >= b[i].lower && p < b[i].upper) {
+		x = i;
+		break;
+	    }
+	}
+
+	abelow = m + (p - b[x].lower)/(b[x].upper - b[x].lower) * this.bins[x];
     }
     this.set_field(id,Math.round10(abelow,-1));
 }
@@ -347,84 +363,91 @@ Data.prototype.write_interquartilerange = function(id) {
     this.set_field(id,Math.round10(this.interquartilerange(),precision));
 }
 
-Data.prototype.entile = function(k,n) {
+Data.prototype.entile = function(k,n,b) {
     var l = k/n*this.data.length;
-    var i = -1;
-    for (var j=0; j < this.bins.length; j++) {
-	if (this.bins[j] < l) {
-	    i = j;
-	    l -= this.bins[j];
+    var x = this.bins.length-1;
+    var m = 0;
+    for (var i=0; i< this.bins.length; i++) {
+	if (this.bins[i] < l) {
+	    l -= this.bins[i];
 	} else {
+	    x = i;
 	    break;
 	}
     }
-    i += 1;
-    return i*this.width + this.offset + l/this.bins[i]*this.width;
+    return b[x].lower + l/this.bins[x]*(b[x].upper - b[x].lower);
 }
 
-Data.prototype.binlowerquartile = function() {
+Data.prototype.binlowerquartile = function(b) {
     if (this.stats.binlowerquartile) {
 	return this.stats.binlowerquartile;
     }
-    this.stats.binlowerquartile = this.entile(1,4);
+    this.stats.binlowerquartile = this.entile(1,4,b);
     return this.stats.binlowerquartile;
 }
 
-Data.prototype.write_binlowerquartile = function(id) {
-    this.set_field(id,Math.round10(this.binlowerquartile(),precision));
+Data.prototype.write_binlowerquartile = function(id,b) {
+    this.set_field(id,Math.round10(this.binlowerquartile(b),precision));
 }
 
-Data.prototype.binupperquartile = function() {
+Data.prototype.binupperquartile = function(b) {
     if (this.stats.binupperquartile) {
 	return this.stats.binupperquartile;
     }
-    this.stats.binupperquartile = this.entile(3,4);
+    this.stats.binupperquartile = this.entile(3,4,b);
     return this.stats.binupperquartile;
 }
 
-Data.prototype.write_binupperquartile = function(id) {
-    this.set_field(id,Math.round10(this.binupperquartile(),precision));
+Data.prototype.write_binupperquartile = function(id,b) {
+    this.set_field(id,Math.round10(this.binupperquartile(b),precision));
 }
 
-Data.prototype.binmean = function() {
+Data.prototype.binmean = function(b) {
     if (this.stats.binmean) {
 	return this.stats.binmean;
     }
     var s = 0;
-    for (var j=0; j < this.bins.length; j++) {
-	s += this.bins[j] * ((j + .5) * this.width + this.offset);
+    var i = 0;
+    var j = 0;
+    while (b[i] && this.sdata[j]) {
+	if (this.sdata[j] < b[i].upper) {
+	    s += (b[i].lower + b[i].upper)/2;
+	    j++;
+	} else {
+	    i++;
+	}
     }
     this.stats.binmean = s/this.data.length;
     return this.stats.binmean;
 }
 
-Data.prototype.write_binmean = function(id) {
-    this.set_field(id,Math.round10(this.binmean(),precision));
+Data.prototype.write_binmean = function(id,b) {
+    this.set_field(id,Math.round10(this.binmean(b),precision));
 }
 
-Data.prototype.binmedian = function() {
+Data.prototype.binmedian = function(b) {
     if (this.stats.binmedian) {
 	return this.stats.binmedian;
     }
-    this.stats.binmedian = this.entile(1,2);
+    this.stats.binmedian = this.entile(1,2,b);
     return this.stats.binmedian;
 }
 
-Data.prototype.write_binmedian = function(id) {
-    this.set_field(id,Math.round10(this.binmedian(),precision));
+Data.prototype.write_binmedian = function(id,b) {
+    this.set_field(id,Math.round10(this.binmedian(b),precision));
 }
 
-Data.prototype.bininterquartilerange = function() {
-    return this.binupperquartile() - this.binlowerquartile();
+Data.prototype.bininterquartilerange = function(b) {
+    return this.binupperquartile(b) - this.binlowerquartile(b);
 }
 
-Data.prototype.write_bininterquartilerange = function(id) {
-    this.set_field(id,Math.round10(this.bininterquartilerange(),precision));
+Data.prototype.write_bininterquartilerange = function(id,b) {
+    this.set_field(id,Math.round10(this.bininterquartilerange(b),precision));
 }
 
-Data.prototype.mode = function() {
-    if (this.stats.mode) {
-	return this.stats.mode;
+Data.prototype.modal = function() {
+    if (this.stats.modal) {
+	return this.stats.modal;
     }
     var i = -1;
     var n = 0;
@@ -434,31 +457,60 @@ Data.prototype.mode = function() {
 	    n = this.bins[j];
 	}
     }
-    this.stats.mode = i;
+    this.stats.modal = i;
+    return this.stats.modal;
+}
+
+Data.prototype.write_modal = function(id,b) {
+    var i = this.modal();
+    str = b[i].labelpre + b[i].labelpost;
+    this.set_field(id,str);
+}
+
+Data.prototype.mode = function () {
+    if (this.stats.mode) {
+	return this.stats.mode;
+    }
+    var n = 0;
+    var m = 0;
+    var md = 0;
+    var p = this.sdata[0];
+    this.sdata.forEach( function(x) {
+	if (x == p) {
+	    n++;
+	} else {
+	    if (n > m) {
+		m = n;
+		md = p;
+	    }
+	    n = 0;
+	}
+	p = x;
+    });
+    if (n > m) {
+	md = p;
+    }
+    this.stats.mode = md;
     return this.stats.mode;
 }
 
 Data.prototype.write_mode = function(id) {
-    str = (this.mode() * this.width + this.offset) + ' \u2014 ' + ((this.mode() + 1) * this.width + this.offset);
-    this.set_field(id,str);
+    this.set_field(id,this.mode());
 }
 
-Data.prototype.draw_histogram = function(ctx,pos,scale,hbin) {
+
+
+Data.prototype.draw_histogram = function(ctx,pos,scale,hbin,bins) {
     var tm;
     ctx.save();
-/*    ctx.translate(0,ctx.canvas.height);
-    ctx.translate(10,-20);
-    ctx.translate(-this.offset*scale,0);
-//    this.drawAxes(ctx,true);
-*/
     ctx.strokeStyle = "black";
     for (var i=0; i<this.bins.length;i++) {
 	ctx.fillStyle = 'gray';
-	ctx.fillRect((i*this.width+this.offset)*scale,0,this.width*scale,-this.bins[i]*hbin);
+	ctx.fillRect(bins[i].lower*scale,0,(bins[i].upper-bins[i].lower)*scale,-this.bins[i]*hbin);
 	if (this.bins[i] != 0) {
 	    tm = ctx.measureText(this.bins[i]);
 	    ctx.fillStyle = 'black';
-	    ctx.fillText(this.bins[i],(this.width*(i+.5)+this.offset)*scale-tm.width/2,-10);
+	    ctx.fillText(this.bins[i],(bins[i].lower+bins[i].upper)/2*scale-tm.width/2,-10);
 	}
     }
     ctx.fillStyle = 'blue';
@@ -612,5 +664,6 @@ distributions = [
 
 data_types = [
     function(x) {return x;},
-    function(x) {return Math.round(x);}
+    function(x) {return Math.round(x);},
+    function(x) {return Math.round(x);},
 ];
