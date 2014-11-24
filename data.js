@@ -311,6 +311,15 @@ Data.prototype.write_pmcc = function(id,d) {
     
 }
 
+Data.prototype.write_regression = function(gid,yid,d) {
+    var sxy = this.Sxy(d);
+    var sxx = this.Sxx();
+    this.set_field(gid,Math.round10(sxy/sxx,precision));
+    var xm = this.mean();
+    var ym = d.mean();
+    this.set_field(yid,Math.round10(ym - sxy*xm/sxx,precision));
+}
+
 Data.prototype.ntile = function(k,n) {
     if (this.sdata.length%n == 0) {
 	return (this.sdata[k*this.sdata.length/n - 1] + this.sdata[k*this.sdata.length/n])/2;
@@ -366,6 +375,27 @@ Data.prototype.interquartilerange = function() {
 
 Data.prototype.write_interquartilerange = function(id) {
     this.set_field(id,Math.round10(this.interquartilerange(),precision));
+}
+
+Data.prototype.write_skewmedian = function(id) {
+    var m = this.mean();
+    var md = this.median();
+    var s = this.stddev();
+    this.set_field(id,Math.round10(3*(m - md)/s,precision));
+}
+
+Data.prototype.write_skewmode = function(id) {
+    var m = this.mean();
+    var md = this.mode();
+    var s = this.stddev();
+    this.set_field(id,Math.round10((m - md)/s,precision));
+}
+
+Data.prototype.write_skewquartile = function(id) {
+    var qa = this.ntile(1,4);
+    var md = this.ntile(2,4);
+    var qb = this.ntile(3,4);
+    this.set_field(id,Math.round10((qb - 2*md + qa)/(qb - qa),precision));
 }
 
 Data.prototype.entile = function(k,n,b) {
@@ -432,6 +462,43 @@ Data.prototype.binmean = function(b) {
 
 Data.prototype.write_binmean = function(id,b) {
     this.set_field(id,Math.round10(this.binmean(b),precision));
+}
+
+Data.prototype.binvariance = function(b) {
+    if (this.stats.binvariance) {
+	return this.stats.binvariance;
+    }
+    var m = this.binmean();
+    var s = 0;
+    var i = 0;
+    var j = 0;
+    while (b[i] && this.sdata[j]) {
+	if (this.sdata[j] < b[i].upper) {
+	    s += Math.pow((b[i].lower + b[i].upper)/2,2);
+	    j++;
+	} else {
+	    i++;
+	}
+    }
+    this.stats.binvariance = s/this.data.length - m&m;
+    return this.stats.binvariance;
+}
+
+Data.prototype.write_binvariance = function(id,b) {
+    this.set_field(id,Math.round10(this.binvariance(b),precision));
+}
+
+Data.prototype.binstddev = function(b) {
+    if (this.stats.binstddev) {
+	return this.stats.binstddev;
+    }
+    var v = this.binvariance(b);
+    this.stats.binstddev = Math.sqrt(v);
+    return this.stats.binstddev;
+}
+
+Data.prototype.write_binstddev = function(id,b) {
+    this.set_field(id,Math.round10(this.binstddev(b),precision));
 }
 
 Data.prototype.binmedian = function(b) {

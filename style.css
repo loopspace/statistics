@@ -110,3 +110,7 @@ body {
     margin-right: 2px;
     float: left;
 }
+
+.rowSpacer > td {
+    padding-top: 10px;
+}

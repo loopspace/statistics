@@ -480,13 +480,60 @@
 	    <td id="siqrange_Y" class="second">
 	    </td>
 	  </tr>
+	  <tr class='rowSpacer'>
+	    <td>
+	      Skewness
+<math xmlns='http://www.w3.org/1998/Math/MathML' display='inline'><mfrac><mrow><mn>3</mn><mo stretchy="false">(</mo><mover><mi>x</mi><mo>&#x000AF;</mo></mover><mo>&minus;</mo><mo lspace="0em" rspace="thinmathspace">median</mo><mo stretchy="false">)</mo></mrow><mi>&sigma;</mi></mfrac></math>:
+	    </td>
+	    <td id="smedskew_X" class="first">
+	    </td>
+	    <td id="smedskew_Y" class="second">
+	    </td>
+	  </tr>
+	  <tr class='discrete'>
+	    <td>
+	      Skewness
+	  <math xmlns='http://www.w3.org/1998/Math/MathML' display='inline'><mfrac><mrow><mover><mi>x</mi><mo>&#x000AF;</mo></mover><mo>&minus;</mo><mo lspace="0em" rspace="thinmathspace">mode</mo></mrow><mi>&sigma;</mi></mfrac></math>:
+	    </td>
+	    <td id="smodeskew_X" class="first">
+	    </td>
+	    <td id="smodeskew_Y" class="second">
+	    </td>
+	  </tr>
 	  <tr>
+	    <td>
+	      Quartile skewness coefficient:
+	    </td>
+	    <td id="sskewq_X" class="first">
+	    </td>
+	    <td id="sskewq_Y" class="second">
+	    </td>
+	  </tr>
+	  <tr class='rowSpacer'>
 	    <td>
 	      Estimate of Mean:
 	    </td>
 	    <td id="sbmean_X" class="first">
 	    </td>
 	    <td id="sbmean_Y" class="second">
+	    </td>
+	  </tr>
+	  <tr>
+	    <td>
+	      Estimate of Variance:
+	    </td>
+	    <td id="sbvariance_X" class="first">
+	    </td>
+	    <td id="sbvariance_Y" class="second">
+	    </td>
+	  </tr>
+	  <tr>
+	    <td>
+	      Estimate of Standard Deviation:
+	    </td>
+	    <td id="sbstddev_X" class="first">
+	    </td>
+	    <td id="sbstddev_Y" class="second">
 	    </td>
 	  </tr>
 	  <tr>
@@ -527,7 +574,7 @@
 	  </tr>
 	</tbody>
 	<tbody id='quantiles'>
-	  <tr>
+	  <tr class='rowSpacer'>
 	    <td>
 	      Additional quantile calculations:
 	    </td>
@@ -617,6 +664,18 @@
 	      <mtd>
 		<mo>=</mo>
 		<mn id='pmcc'>6</mn>
+	      </mtd>
+	    </mtr>
+	    <mtr>
+	      <mtd>
+		<mi>Y</mi>
+	      </mtd>
+	      <mtd>
+		<mo>=</mo>
+		<mn id='gradient'>7</mn>
+		<mi>X</mi>
+		<mo>+</mo>
+		<mn id='intercept'>8</mn>
 	      </mtd>
 	    </mtr>
 	  </mtable>

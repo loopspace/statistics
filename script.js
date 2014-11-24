@@ -237,9 +237,14 @@ function getValues (redo) {
     data_X.write_lowerquartile('slowq_X');
     data_X.write_upperquartile('supq_X');
     data_X.write_interquartilerange('siqrange_X');
+    data_X.write_skewmedian('smedskew_X');
+    data_X.write_skewmode('smodeskew_X');
+    data_X.write_skewquartile('sskewq_X');
     data_X.write_binlowerquartile('sblowq_X',bins);
     data_X.write_binmedian('sbmedian_X',bins);
     data_X.write_binmean('sbmean_X',bins);
+    data_X.write_binvariance('sbvariance_X',bins);
+    data_X.write_binstddev('sbstddev_X',bins);
     data_X.write_binupperquartile('sbupq_X',bins);
     data_X.write_bininterquartilerange('sbiqrange_X',bins);
 
@@ -258,9 +263,14 @@ function getValues (redo) {
     data_Y.write_lowerquartile('slowq_Y');
     data_Y.write_upperquartile('supq_Y');
     data_Y.write_interquartilerange('siqrange_Y');
+    data_Y.write_skewmedian('smedskew_Y');
+    data_Y.write_skewmode('smodeskew_Y');
+    data_Y.write_skewquartile('sskewq_Y');
     data_Y.write_binlowerquartile('sblowq_Y',bins);
     data_Y.write_binmedian('sbmedian_Y',bins);
     data_Y.write_binmean('sbmean_Y',bins);
+    data_Y.write_binvariance('sbvariance_X',bins);
+    data_Y.write_binstddev('sbstddev_X',bins);
     data_Y.write_binupperquartile('sbupq_Y',bins);
     data_Y.write_bininterquartilerange('sbiqrange_Y',bins);
 
@@ -298,6 +308,7 @@ function getValues (redo) {
     data_Y.write_Sxx('Syy');
     data_X.write_Sxy('Sxy',data_Y);
     data_X.write_pmcc('pmcc',data_Y);
+    data_X.write_regression('gradient','intercept',data_Y);
 
     
     // Frequency Table
@@ -732,6 +743,16 @@ function scatter() {
 	tm = sctx.measureText(i*w);
 	sctx.fillText(i*w,-14-tm.width/2,-w*i*s);
     }
+    sctx.stroke();
+    sctx.beginPath();
+    var sxy = data_X.Sxy(data_Y);
+    var sxx = data_X.Sxx();
+    var g = sxy/sxx;
+    var xm = data_X.mean();
+    var ym = data_Y.mean();
+    var yin = ym - g*xm;
+    sctx.moveTo(lx*s,-(lx*g + yin)*s);
+    sctx.lineTo(hx*s,-(hx*g + yin)*s);
     sctx.stroke();
     for (var i=0; i < data_X.data.length; i++) {
 	mark(sctx,s*data_X.data[i],-s*data_Y.data[i]);
