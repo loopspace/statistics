@@ -4,8 +4,9 @@ var distributions = [];
 var data_types = [];
 var precision = -1;
 
-Data = function() {
+Data = function(s) {
     this.active = true;
+    this.suffix = s;
 }
 
 Data.prototype.generate = function(m,s,n,d,t) {
@@ -33,10 +34,17 @@ Data.prototype.has_data = function() {
     }
 }
 
-Data.prototype.set_field = function(id,s) {
-//    if (this.active) {
-	document.querySelector('#' + id).innerHTML = s;
-//    }
+Data.prototype.set_field = function(id,s,b) {
+    var i = '#' + id;
+    if (!b) {
+	i += '_' + this.suffix;
+    }
+    var elt = document.querySelector(i);
+    if (elt) {
+	elt.innerHTML = s;
+    } else {
+	console.log('Trying to write to non-existant element with id ' + i);
+    }
 }
 
 Data.prototype.enable = function(b) {
@@ -277,7 +285,7 @@ Data.prototype.Sxx = function() {
 }
 
 Data.prototype.write_Sxx = function(id) {
-    this.set_field(id,Math.round10(this.Sxx(),precision));
+    this.set_field(id,Math.round10(this.Sxx(),precision),true);
 }
 
 Data.prototype.Sxy = function(d) {
@@ -295,7 +303,7 @@ Data.prototype.Sxy = function(d) {
 }
 
 Data.prototype.write_Sxy = function(id,d) {
-    this.set_field(id,Math.round10(this.Sxy(d),precision));
+    this.set_field(id,Math.round10(this.Sxy(d),precision),true);
 }
 
 Data.prototype.pmcc = function(d) {
@@ -307,17 +315,17 @@ Data.prototype.pmcc = function(d) {
 }
 
 Data.prototype.write_pmcc = function(id,d) {
-    this.set_field(id,Math.round10(this.pmcc(d),precision));
+    this.set_field(id,Math.round10(this.pmcc(d),precision),true);
     
 }
 
 Data.prototype.write_regression = function(gid,yid,d) {
     var sxy = this.Sxy(d);
     var sxx = this.Sxx();
-    this.set_field(gid,Math.round10(sxy/sxx,precision));
+    this.set_field(gid,Math.round10(sxy/sxx,precision),true);
     var xm = this.mean();
     var ym = d.mean();
-    this.set_field(yid,Math.round10(ym - sxy*xm/sxx,precision));
+    this.set_field(yid,Math.round10(ym - sxy*xm/sxx,precision),true);
 }
 
 Data.prototype.ntile = function(k,n) {
@@ -480,7 +488,7 @@ Data.prototype.binvariance = function(b) {
 	    i++;
 	}
     }
-    this.stats.binvariance = s/this.data.length - m&m;
+    this.stats.binvariance = s/this.data.length - m*m;
     return this.stats.binvariance;
 }
 
@@ -729,7 +737,7 @@ var uniform =  function(m,s) {
 }
 
 var exponential = function(m,s) {
-    return -Math.log(1 - Math.random())*m;
+    return -Math.log(1 - Math.random())*s + m - s;
 }
 
 distributions = [

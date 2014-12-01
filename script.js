@@ -3,8 +3,8 @@ var bctx;
 var sctx;
 var values = new Object();
 var bins = [];
-var data_X = new Data();
-var data_Y = new Data();
+var data_X = new Data('X');
+var data_Y = new Data('Y');
 var scale = 10;
 var ascale = scale;
 var offset = 0;
@@ -219,60 +219,60 @@ function getValues (redo) {
     data_Y.set_table(bins);
 
     pos = data_X.median();
-    data_X.write_below('below_X',pos);
-    data_X.write_abelow('abelow_X',pos,bins);
-    data_Y.write_below('below_Y',pos);
-    data_Y.write_abelow('abelow_Y',pos,bins);
+    data_X.write_below('below',pos);
+    data_X.write_abelow('abelow',pos,bins);
+    data_Y.write_below('below',pos);
+    data_Y.write_abelow('abelow',pos,bins);
     document.querySelector('#mark').innerHTML = Math.floor(pos);
     
-    data_X.write_mean('smean_X');
-    data_X.write_median('smedian_X');
+    data_X.write_mean('smean');
+    data_X.write_median('smedian');
     if (values.type == 1) {
-	data_X.write_mode('smode_X');
+	data_X.write_mode('smode');
     } else {
-	data_X.write_modal('smode_X',bins);
+	data_X.write_modal('smode',bins);
     }
-    data_X.write_variance('svariance_X');
-    data_X.write_stddev('sstddev_X');
-    data_X.write_lowerquartile('slowq_X');
-    data_X.write_upperquartile('supq_X');
-    data_X.write_interquartilerange('siqrange_X');
-    data_X.write_skewmedian('smedskew_X');
-    data_X.write_skewmode('smodeskew_X');
-    data_X.write_skewquartile('sskewq_X');
-    data_X.write_binlowerquartile('sblowq_X',bins);
-    data_X.write_binmedian('sbmedian_X',bins);
-    data_X.write_binmean('sbmean_X',bins);
-    data_X.write_binvariance('sbvariance_X',bins);
-    data_X.write_binstddev('sbstddev_X',bins);
-    data_X.write_binupperquartile('sbupq_X',bins);
-    data_X.write_bininterquartilerange('sbiqrange_X',bins);
+    data_X.write_variance('svariance');
+    data_X.write_stddev('sstddev');
+    data_X.write_lowerquartile('slowq');
+    data_X.write_upperquartile('supq');
+    data_X.write_interquartilerange('siqrange');
+    data_X.write_skewmedian('smedskew');
+    data_X.write_skewmode('smodeskew');
+    data_X.write_skewquartile('sskewq');
+    data_X.write_binlowerquartile('sblowq',bins);
+    data_X.write_binmedian('sbmedian',bins);
+    data_X.write_binmean('sbmean',bins);
+    data_X.write_binvariance('sbvariance',bins);
+    data_X.write_binstddev('sbstddev',bins);
+    data_X.write_binupperquartile('sbupq',bins);
+    data_X.write_bininterquartilerange('sbiqrange',bins);
 
-    data_X.write('data_X');
-    data_X.write_sorted('sdata_X');
+    data_X.write('data');
+    data_X.write_sorted('sdata');
 
-    data_Y.write_mean('smean_Y');
-    data_Y.write_median('smedian_Y');
+    data_Y.write_mean('smean');
+    data_Y.write_median('smedian');
     if (values.type == 1) {
-	data_Y.write_mode('smode_Y');
+	data_Y.write_mode('smode');
     } else {
-	data_Y.write_modal('smode_Y',bins);
+	data_Y.write_modal('smode',bins);
     }
-    data_Y.write_variance('svariance_Y');
-    data_Y.write_stddev('sstddev_Y');
-    data_Y.write_lowerquartile('slowq_Y');
-    data_Y.write_upperquartile('supq_Y');
-    data_Y.write_interquartilerange('siqrange_Y');
-    data_Y.write_skewmedian('smedskew_Y');
-    data_Y.write_skewmode('smodeskew_Y');
-    data_Y.write_skewquartile('sskewq_Y');
-    data_Y.write_binlowerquartile('sblowq_Y',bins);
-    data_Y.write_binmedian('sbmedian_Y',bins);
-    data_Y.write_binmean('sbmean_Y',bins);
-    data_Y.write_binvariance('sbvariance_X',bins);
-    data_Y.write_binstddev('sbstddev_X',bins);
-    data_Y.write_binupperquartile('sbupq_Y',bins);
-    data_Y.write_bininterquartilerange('sbiqrange_Y',bins);
+    data_Y.write_variance('svariance');
+    data_Y.write_stddev('sstddev');
+    data_Y.write_lowerquartile('slowq');
+    data_Y.write_upperquartile('supq');
+    data_Y.write_interquartilerange('siqrange');
+    data_Y.write_skewmedian('smedskew');
+    data_Y.write_skewmode('smodeskew');
+    data_Y.write_skewquartile('sskewq');
+    data_Y.write_binlowerquartile('sblowq',bins);
+    data_Y.write_binmedian('sbmedian',bins);
+    data_Y.write_binmean('sbmean',bins);
+    data_Y.write_binvariance('sbvariance',bins);
+    data_Y.write_binstddev('sbstddev',bins);
+    data_Y.write_binupperquartile('sbupq',bins);
+    data_Y.write_bininterquartilerange('sbiqrange',bins);
 
     var elts = document.getElementsByClassName('quantiles');
     var ch,k,n,m,idb;
@@ -293,15 +293,15 @@ function getValues (redo) {
 	    }
 	}
 	if (k != '' && n != '') {
-	    data_X.write_ntile('quantile_' + m + '_X',k,n);
-	    data_Y.write_ntile('quantile_' + m + '_Y',k,n);
-	    data_X.write_entile('equantile_' + m + '_X',k,n,bins);
-	    data_Y.write_entile('equantile_' + m + '_Y',k,n,bins);
+	    data_X.write_ntile('quantile_' + m,k,n);
+	    data_Y.write_ntile('quantile_' + m,k,n);
+	    data_X.write_entile('equantile_' + m,k,n,bins);
+	    data_Y.write_entile('equantile_' + m,k,n,bins);
 	}
     }
     
-    data_Y.write('data_Y');
-    data_Y.write_sorted('sdata_Y');
+    data_Y.write('data');
+    data_Y.write_sorted('sdata');
 
     // Correlation
     data_X.write_Sxx('Sxx');
@@ -363,10 +363,10 @@ function getRelativeCoords(event) {
 function recalc(e) {
     var coords = getRelativeCoords(e);
     pos = (coords.x - parseInt(window.getComputedStyle(hctx.canvas).marginLeft,10) - parseInt(window.getComputedStyle(hctx.canvas).marginRight,10) + offset)/ascale;
-    data_X.write_below('below_X',pos);
-    data_X.write_abelow('abelow_X',pos,bins);
-    data_Y.write_below('below_Y',pos);
-    data_Y.write_abelow('abelow_Y',pos,bins);
+    data_X.write_below('below',pos);
+    data_X.write_abelow('abelow',pos,bins);
+    data_Y.write_below('below',pos);
+    data_Y.write_abelow('abelow',pos,bins);
     document.querySelector('#mark').innerHTML = Math.floor(pos);
     plots();
 }
