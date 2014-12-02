@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
 <html>
   <head>
     <meta charset="utf-8">
@@ -6,6 +7,14 @@
     <link rel="stylesheet" type="text/css" href="style.css">
     <script type="text/javascript" src="data.js"></script>
     <script type="text/javascript" src="script.js"></script>
+    <script type="text/javascript">
+      if(navigator.userAgent.toLowerCase().indexOf('firefox') == -1)
+      {
+      document.write(
+      '<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=MML_HTMLorMML"></sc' +
+      'ript>');
+	}
+    </script>
   </head>
   <body>
     <form id="form"></form>
@@ -44,6 +53,7 @@ Students can generate data and see the results of the calculations; also student
 		<option value="gaussian">Gaussian (Normal)</option>
 		<option value="exponential">(Translated) Exponential</option>
 		<option value="uniform">Uniform</option>
+		<option value="lognormal">Log-Normal</option>
 	      </select>
 	    </td>
 	  </tr>
@@ -114,6 +124,7 @@ Students can generate data and see the results of the calculations; also student
 		<option value="gaussian">Gaussian (Normal)</option>
 		<option value="exponential">(Translated) Exponential</option>
 		<option value="uniform">Uniform</option>
+		<option value="lognormal">Log-Normal</option>
 	      </select>
 	    </td>
 	  </tr>
@@ -605,8 +616,9 @@ Students can generate data and see the results of the calculations; also student
 	</tbody>
       </table>
     </div>
+    <div id='correlationStatistics'>
     <h3 class='second'><a href="#" class="arrow">&#9660;</a>Correlation</h3>
-    <div id='correlation' class='second'>
+    <div class='second'>
       <canvas id='scatter'></canvas>
       <div id='corrmathml'>
       <math xmlns='http://www.w3.org/1998/Math/MathML'
@@ -686,6 +698,7 @@ Students can generate data and see the results of the calculations; also student
 	</mrow>
       </math>
       </div>
+    </div>
     </div>
     <script type="text/javascript">
       setTimeout(init(),500);

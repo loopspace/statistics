@@ -3,8 +3,8 @@ var bctx;
 var sctx;
 var values = new Object();
 var bins = [];
-var data_X = new Data('X');
-var data_Y = new Data('Y');
+var data_X;
+var data_Y;
 var scale = 10;
 var ascale = scale;
 var offset = 0;
@@ -13,6 +13,8 @@ var pos;
 var mouseClicked;
 
 function init() {
+    data_X = new Data('X');
+    data_Y = new Data('Y');
     var histogram = document.querySelector("#histogram");
     histogram.addEventListener("mousedown",doMouseDown,false);
     histogram.addEventListener("mouseup",doMouseUp,false);
@@ -27,6 +29,10 @@ function init() {
     sctx = scatterplot.getContext('2d');
     
     var elts = document.querySelector("#form").elements;
+    if (elts.length == 0) {
+	elts = document.querySelectorAll('[form]');
+    }
+    
     for (var i=0, element; element = elts[i++];) {
 	if (element.type === "text")
     	    element.onkeypress = checkReturn;
@@ -69,6 +75,10 @@ function init() {
 
 function getValues (redo) {
     var elts = document.querySelector("#form").elements;
+    // hack for IE
+    if (elts.length == 0) {
+	elts = document.querySelectorAll('[form]');
+    }
     var redo = redo || false;
     var x;
     var ndarr = [];
@@ -167,6 +177,14 @@ function getValues (redo) {
     }
     data_Y.initialise();
 
+    if (data_X.data.length == data_Y.data.length) {
+	document.getElementById('correlationStatistics').style.display = 'block';
+    } else {
+	document.getElementById('correlationStatistics').style.display = 'none';
+    }
+    
+
+    
     bins = [];
     var lv,hv,lbls,lble;
     if (values.even) {
@@ -304,11 +322,13 @@ function getValues (redo) {
     data_Y.write_sorted('sdata');
 
     // Correlation
-    data_X.write_Sxx('Sxx');
-    data_Y.write_Sxx('Syy');
-    data_X.write_Sxy('Sxy',data_Y);
-    data_X.write_pmcc('pmcc',data_Y);
-    data_X.write_regression('gradient','intercept',data_Y);
+    // As these are inside a MathML element, we need to inform MathJax that we're changing them.
+    if (typeof MathJax !== 'undefined') {
+	MathJax.Hub.Queue(writeCorrelation);
+	MathJax.Hub.Queue(["Typeset",MathJax.Hub,'corrmathml']);
+    } else {
+	writeCorrelation();
+    }
 
     
     // Frequency Table
@@ -352,7 +372,16 @@ function getValues (redo) {
     // Correlation graph
     if (data_Y.active)
 	scatter();
+
     return false;
+}
+
+function writeCorrelation() {
+    data_X.write_Sxx('Sxx');
+    data_Y.write_Sxx('Syy');
+    data_X.write_Sxy('Sxy',data_Y);
+    data_X.write_pmcc('pmcc',data_Y);
+    data_X.write_regression('gradient','intercept',data_Y);
 }
 
 function getRelativeCoords(event) {
@@ -706,21 +735,24 @@ function plots() {
 }
 
 function scatter() {
-    var lx,hx,s;
-    lx = Math.min(0,bins[0].lower);
-    hx = Math.ceil(bins[bins.length-1].upper/10)*10;
-    s = Math.min(scale,hctx.canvas.width/bins[bins.length-1].upper);
-    sctx.canvas.height = s*(hx-lx)+40;
+    var lx,hx,ly,hy,s;
+    var w = 10;
+    lx = Math.floor(Math.min(0,data_X.sdata[0])/w)*w;
+    ly = Math.floor(Math.min(0,data_Y.sdata[0])/w)*w;
+    hx = Math.ceil(Math.max(0,data_X.sdata[data_X.sdata.length-1])/w)*w;
+    hy = Math.ceil(Math.max(0,data_Y.sdata[data_Y.sdata.length-1])/w)*w;
+    s = Math.min(scale,hctx.canvas.width/(hx-lx));
+    sctx.canvas.height = s*(hy-ly)+40;
     
     sctx.save();
     sctx.translate(0,sctx.canvas.height);
     sctx.translate(20,-20);
-    sctx.translate(-lx*s,-lx*s);
+    sctx.translate(-lx*s,ly*s);
 
     var height = sctx.canvas.height;
     sctx.beginPath();
-    sctx.moveTo(0,10+lx*s);
-    sctx.lineTo(0,-hx*s - 10);
+    sctx.moveTo(0,10+ly*s);
+    sctx.lineTo(0,-hy*s - 10);
     sctx.stroke();
     sctx.beginPath();
     sctx.moveTo(-10+lx*s,0);
@@ -728,20 +760,34 @@ function scatter() {
     sctx.stroke();
     sctx.beginPath();
     var tm;
-    var w = 10;
     sctx.fillStyle = 'black';
-    var nb = Math.ceil((hx-lx)/w);
+    var nb = Math.ceil(hx/w);
     for (var i=0; i<=nb;i++) {
 	sctx.moveTo(i*w*s,0);
 	sctx.lineTo(i*w*s,5);
 	tm = sctx.measureText(i*w);
 	sctx.fillText(i*w,w*i*s-tm.width/2,14);
     }
+    nb = Math.ceil(-lx/w);
+    for (var i=1; i<=nb;i++) {
+	sctx.moveTo(-i*w*s,0);
+	sctx.lineTo(-i*w*s,5);
+	tm = sctx.measureText(-i*w);
+	sctx.fillText(-i*w,-w*i*s-tm.width/2,14);
+    }
+    nb = Math.ceil(hy/w);
     for (var i=0; i<=nb;i++) {
 	sctx.moveTo(0,-i*w*s);
 	sctx.lineTo(-5,-i*w*s);
 	tm = sctx.measureText(i*w);
 	sctx.fillText(i*w,-14-tm.width/2,-w*i*s);
+    }
+    nb = Math.ceil(-ly/w);
+    for (var i=1; i<=nb;i++) {
+	sctx.moveTo(0,i*w*s);
+	sctx.lineTo(-5,i*w*s);
+	tm = sctx.measureText(-i*w);
+	sctx.fillText(-i*w,-14-tm.width/2,-w*i*s);
     }
     sctx.stroke();
     sctx.beginPath();

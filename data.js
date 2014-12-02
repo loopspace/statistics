@@ -5,6 +5,9 @@ var data_types = [];
 var precision = -1;
 
 Data = function(s) {
+    this.data = [];
+    this.gdata = [];
+    this.sdata = [];
     this.active = true;
     this.suffix = s;
 }
@@ -295,7 +298,8 @@ Data.prototype.Sxy = function(d) {
     var s = 0;
     var m = this.mean();
     var md = d.mean();
-    for (var i=0; i < this.data.length; i++) {
+    var n = this.data.length;
+    for (var i=0; i < n; i++) {
 	s += (this.data[i] - m) * (d.data[i] - md);
     }
     this.stats.Sxy = s;
@@ -732,6 +736,8 @@ var makeGauss = function() {
     }
 }
 
+var gaussian = makeGauss();
+
 var uniform =  function(m,s) {
     return (2 * Math.random() - 1)*s*Math.sqrt(3) + m;
 }
@@ -740,10 +746,19 @@ var exponential = function(m,s) {
     return -Math.log(1 - Math.random())*s + m - s;
 }
 
+var lognormal = function(m,s) {
+    var ms = m*m;
+    var v = s*s;
+    var mu = Math.log(ms/Math.sqrt(v + ms));
+    var sigma = Math.sqrt(Math.log(1 + v/ms));
+    return Math.exp(gaussian(mu,sigma));
+}
+
 distributions = [
-    makeGauss(),
+    gaussian,
     exponential,
     uniform,
+    lognormal
 ];
 
 data_types = [
