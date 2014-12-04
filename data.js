@@ -622,7 +622,7 @@ Data.prototype.draw_histogram = function(ctx,pos,scale,hbin,bins) {
     ctx.restore();
 }
 
-Data.prototype.draw_boxplot = function(ctx) {
+Data.prototype.draw_boxplot = function(ctx,s) {
 /*    clear(ctx);
     ctx.translate(0,ctx.canvas.height);
     ctx.translate(10,-20);
@@ -635,11 +635,11 @@ Data.prototype.draw_boxplot = function(ctx) {
     var uq = this.upperquartile();
     var iq = uq - lq;
     ctx.fillStyle = 'gray';
-    ctx.fillRect(lq*scale,-10,iq*scale,-40);
+    ctx.fillRect(lq*s,-10,iq*s,-40);
     ctx.beginPath();
     ctx.strokeStyle = 'red';
-    ctx.moveTo(md*scale,-10);
-    ctx.lineTo(md*scale,-50);
+    ctx.moveTo(md*s,-10);
+    ctx.lineTo(md*s,-50);
     ctx.stroke();
     var lf = lq - 1.5*iq;
     var uf = uq + 1.5*iq;
@@ -653,21 +653,21 @@ Data.prototype.draw_boxplot = function(ctx) {
     });
     ctx.beginPath();
     ctx.strokeStyle = 'black';
-    ctx.moveTo(lq*scale,-30);
-    ctx.lineTo(lw*scale,-30);
-    ctx.moveTo(lw*scale,-50);
-    ctx.lineTo(lw*scale,-10);
-    ctx.moveTo(uq*scale,-30);
-    ctx.lineTo(uw*scale,-30);
-    ctx.moveTo(uw*scale,-50);
-    ctx.lineTo(uw*scale,-10);
+    ctx.moveTo(lq*s,-30);
+    ctx.lineTo(lw*s,-30);
+    ctx.moveTo(lw*s,-50);
+    ctx.lineTo(lw*s,-10);
+    ctx.moveTo(uq*s,-30);
+    ctx.lineTo(uw*s,-30);
+    ctx.moveTo(uw*s,-50);
+    ctx.lineTo(uw*s,-10);
     ctx.stroke();
     this.data.forEach(function(x) {
 	ctx.fillStyle = 'blue';
-	mark(ctx,x*scale,-60);
+	mark(ctx,x*s,-60);
 	ctx.fillStyle = 'black';
 	if ((x < lw) || (x > uw))
-	    mark(ctx,x*scale,-30);
+	    mark(ctx,x*s,-30);
     });
     ctx.restore();
 }

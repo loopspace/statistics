@@ -416,7 +416,7 @@ function doMouseMove(e) {
 
 
 function setSize(cvs) {
-    cvs.width=window.innerWidth - parseInt(window.getComputedStyle(cvs).marginLeft,10) - parseInt(window.getComputedStyle(cvs).marginRight,10);
+    cvs.width=document.body.clientWidth - parseInt(window.getComputedStyle(cvs).marginLeft,10) - parseInt(window.getComputedStyle(cvs).marginRight,10);
 }
 
 function checkReturn(e) {
@@ -691,7 +691,7 @@ function plots() {
     var lx,hx,s,vs;
     lx = Math.min(0,bins[0].lower);
     hx = bins[bins.length-1].upper;
-    s = Math.min(scale,hctx.canvas.width/bins[bins.length-1].upper);
+    s = Math.min(scale,(hctx.canvas.width-40)/(hx-lx));
     if (data_Y.active) {
 	hctx.canvas.height = "250";
 	vs =  Math.min(10/Math.ceil(Math.max.apply(null,data_X.bins)/10),10/Math.ceil(Math.max.apply(null,data_X.bins)/10));
@@ -725,10 +725,10 @@ function plots() {
     bctx.translate(10,-20);
     bctx.translate(-lx*s,0);
     drawAxes(bctx,lx,hx,s,bins);//values.classb);
-    data_X.draw_boxplot(bctx);
+    data_X.draw_boxplot(bctx,s);
     if (data_Y.active) {
 	bctx.translate(0,-bctx.canvas.height/2);
-	data_Y.draw_boxplot(bctx);
+	data_Y.draw_boxplot(bctx,s);
     }
     bctx.restore();
     
@@ -741,7 +741,7 @@ function scatter() {
     ly = Math.floor(Math.min(0,data_Y.sdata[0])/w)*w;
     hx = Math.ceil(Math.max(0,data_X.sdata[data_X.sdata.length-1])/w)*w;
     hy = Math.ceil(Math.max(0,data_Y.sdata[data_Y.sdata.length-1])/w)*w;
-    s = Math.min(scale,hctx.canvas.width/(hx-lx));
+    s = Math.min(scale,(hctx.canvas.width-50)/(hx-lx));
     sctx.canvas.height = s*(hy-ly)+40;
     
     sctx.save();
@@ -751,7 +751,7 @@ function scatter() {
 
     var height = sctx.canvas.height;
     sctx.beginPath();
-    sctx.moveTo(0,10+ly*s);
+    sctx.moveTo(0,10-ly*s);
     sctx.lineTo(0,-hy*s - 10);
     sctx.stroke();
     sctx.beginPath();
@@ -787,7 +787,7 @@ function scatter() {
 	sctx.moveTo(0,i*w*s);
 	sctx.lineTo(-5,i*w*s);
 	tm = sctx.measureText(-i*w);
-	sctx.fillText(-i*w,-14-tm.width/2,-w*i*s);
+	sctx.fillText(-i*w,-14-tm.width/2,w*i*s);
     }
     sctx.stroke();
     sctx.beginPath();
@@ -811,7 +811,6 @@ function addQuantile(e) {
     }
     var lrow = e.rows[e.rows.length-2].id;
     var n = parseInt(lrow.substring(lrow.indexOf('_')+1),10);
-    console.log(e.rows);
     n++;
     var nrow = e.insertRow(-1);
     nrow.id = 'quantile_' + n;
