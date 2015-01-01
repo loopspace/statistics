@@ -425,7 +425,11 @@ Students can generate data and see the results of the calculations; also student
 	<tbody>
 	  <tr>
 	    <td>
-	      Mean:
+	      <span class='stooltip'>Mean:</span>
+	      <span class='tooltip'>
+		The <span class='defn'>mean</span> of a data set is
+		the sum of the values divided by the number of values.
+<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mover><mi>x</mi><mo>&#x000AF;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><msubsup><mo lspace="thinmathspace" rspace="thinmathspace">&Sum;</mo> <mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow> <mi>n</mi></msubsup><msub><mi>x</mi> <mi>i</mi></msub></math>	      </span>
 	    </td>
 	    <td id="smean_X" class="first">
 	    </td>
@@ -434,7 +438,13 @@ Students can generate data and see the results of the calculations; also student
 	  </tr>
 	  <tr>
 	    <td>
-	      Median:
+	      <span class='stooltip'>Median:</span>
+	      <span class='tooltip'>
+		The <span class='defn'>median</span> of a data set is
+		the middle value when they are listed in order.
+		If there are an even number, it is the average of the
+		two middle values.
+	      </span>
 	    </td>
 	    <td id="smedian_X" class="first">
 	    </td>
@@ -443,7 +453,19 @@ Students can generate data and see the results of the calculations; also student
 	  </tr>
 	  <tr>
 	    <td>
-	      <span class="cts">Modal class</span><span class="discrete">Mode</span>:
+	      <span class="cts"><span class='stooltip'>Modal class:</span><span class='tooltip'>
+		  To define the <span class='defn'>modal class</span> of a data
+		  set, the data needs to be divided into classes as in
+		  a frequency table.
+		  Then the <span class='defn'>modal class</span> is
+		  the class or classes containing the most elements of
+		  the data set.
+		</span>
+		</span><span class="discrete"><span class='tooltip'>Mode:</span><span class='tooltip'>
+		  The <span class='defn'>mode</span> of a data
+		  set is the value or values that occur most
+		  frequently in the data.
+		</span></span>
 	    </td>
 	    <td id="smode_X" class="first">
 	    </td>
@@ -452,7 +474,16 @@ Students can generate data and see the results of the calculations; also student
 	  </tr>
 	  <tr>
 	    <td>
-	      Variance:
+	      <span class='stooltip'>Variance:</span>
+	      <span class='tooltip'>
+		The <span class='defn'>variance</span> of a data set
+		is a measure of its spread.  It is defined as:
+		<math xmlns='http://www.w3.org/1998/Math/MathML'
+		display='block'><msup><mi>&sigma;</mi> <mn>2</mn></msup><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><msubsup><mo lspace="thinmathspace"
+																  rspace="thinmathspace">&Sum;</mo> <mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow> <mi>n</mi></msubsup><mo stretchy="false">(</mo><msub><mi>x</mi> <mi>i</mi></msub><mo>&minus;</mo><mover><mi>x</mi><mo>&#x000AF;</mo></mover><msup><mo stretchy="false">)</mo> <mn>2</mn></msup></math>
+		(where <math xmlns='http://www.w3.org/1998/Math/MathML' display='inline'><mover><mi>x</mi><mo>&#x000AF;</mo></mover></math> is the mean) but is more conveniently calculated using the formula:
+		<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msup><mi>&sigma;</mi> <mn>2</mn></msup><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo lspace="thinmathspace" rspace="thinmathspace">&Sum;</mo> <mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow> <mi>n</mi></munderover><msubsup><mi>x</mi> <mi>i</mi> <mn>2</mn></msubsup><mo>&minus;</mo><msup><mover><mi>x</mi><mo>&#x000AF;</mo></mover> <mn>2</mn></msup></math>
+	      </span>
 	    </td>
 	    <td id="svariance_X" class="first">
 	    </td>
@@ -461,7 +492,12 @@ Students can generate data and see the results of the calculations; also student
 	  </tr>
 	  <tr>
 	    <td>
-	      Standard Deviation:
+	      <span class='stooltip'>Standard Deviation:</span>
+	      <span class='tooltip'>
+		The <span class='defn'>standard deviation</span> of a
+		data set is a measure of its spread.
+		It is defined as the square root of the variance.
+	      </span>
 	    </td>
 	    <td id="sstddev_X" class="first">
 	    </td>
@@ -470,7 +506,15 @@ Students can generate data and see the results of the calculations; also student
 	  </tr>
 	  <tr>
 	    <td>
-	      Lower Quartile:
+	      <span class='stooltip'>Lower Quartile:</span>
+	      <span class='tooltip'>
+		The <span class='defn'>lower quartile</span> of a data
+		set is the value such that a quarter of the points lie
+		below that value and three-quarters lie above.  Its
+		definition is slightly different depending on whether
+		or not there is an actual data point satisfying that
+		property.
+	      </span>
 	    </td>
 	    <td id="slowq_X" class="first">
 	    </td>
@@ -479,7 +523,15 @@ Students can generate data and see the results of the calculations; also student
 	  </tr>
 	  <tr>
 	    <td>
-	      Upper Quartile:
+	      <span class='stooltip'>Upper Quartile:</span>
+	      <span class='tooltip'>
+		The <span class='defn'>upper quartile</span> of a data
+		set is the value such that three-quarters of the points lie
+		below that value and a quarter lie above.  Its
+		definition is slightly different depending on whether
+		or not there is an actual data point satisfying that
+		property.
+	      </span>
 	    </td>
 	    <td id="supq_X" class="first">
 	    </td>
@@ -488,7 +540,12 @@ Students can generate data and see the results of the calculations; also student
 	  </tr>
 	  <tr>
 	    <td>
-	      Inter-Quartile Range:
+	      <span class='stooltip'>Inter-Quartile Range:</span>
+	      <span class='tooltip'>
+		The <span class='defn'>inter-quartile range</span> of
+		a data set is a measure of its spread.  It is defined
+		as the upper quartile minus the lower quartile.
+	      </span>
 	    </td>
 	    <td id="siqrange_X" class="first">
 	    </td>
