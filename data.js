@@ -292,7 +292,7 @@ Data.prototype.write_Sxx = function(id) {
 }
 
 Data.prototype.Sxy = function(d) {
-    if (this.stats.Sxy) {
+    if (this.stats.Sxy && d.stats.Sxy) {
 	return this.stats.Sxy;
     }
     var s = 0;
@@ -303,6 +303,7 @@ Data.prototype.Sxy = function(d) {
 	s += (this.data[i] - m) * (d.data[i] - md);
     }
     this.stats.Sxy = s;
+    d.stats.Sxy = s;
     return this.stats.Sxy;
 }
 
@@ -311,10 +312,11 @@ Data.prototype.write_Sxy = function(id,d) {
 }
 
 Data.prototype.pmcc = function(d) {
-    if (this.stats.pmcc) {
+    if (this.stats.pmcc && d.stats.pmcc) {
 	return this.stats.pmcc;
     }
     this.stats.pmcc = this.Sxy(d)/Math.sqrt(this.Sxx() * d.Sxx());
+    d.stats.pmcc = this.stats.pmcc;
     return this.stats.pmcc;
 }
 

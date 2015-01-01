@@ -140,6 +140,8 @@ function getValues (redo) {
     if (redo) {
 	// Regenerate random data
 	data_X.generate(values.mean_X,values.stddev_X,values.number_X,values.distribution_X,values.type);
+    }
+    if (redo || values.correlate) {
 	data_Y.generate(values.mean_Y,values.stddev_Y,values.number_Y,values.distribution_Y,values.type);
     }
     if (values.correlate) {
