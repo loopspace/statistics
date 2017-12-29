@@ -1,3 +1,101 @@
+body {
+    background: #8b1a1a;
+    margin: 0;
+    overflow-y: hidden;
+}
+
+
+
+#content {
+/*    margin: 0 auto; */
+    height: 85vh;
+    height: calc(90vh - 5em);
+    top: 3em;
+    margin-left: 140px;
+    padding: 2ex 22ex 2ex 2ex;
+    /*    max-width: 70ex; */
+    overflow-y: hidden;
+    /*    position: relative;*/
+}
+
+#main {
+    /*position: relative;*/
+    -webkit-overflow-scrolling: touch;
+    /*    min-height: calc(100vh - 4em - 12pt);*/
+    /*    min-height: 300px; */
+    height: 300px;
+    background: #fff;
+    padding: 2em;
+    border-radius: 5pt;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+#tabsdiv {
+    padding: 0px;
+}
+
+#tabs {
+    display: inline;
+    list-style-type: none;
+    margin: 0px;
+    vertical-align: bottom;
+}
+
+h1 {
+    margin: 20px;
+    color: #eee;
+}
+
+#intro {
+    border-radius: 5px;
+    background-color: #aaa;
+    padding: 5px;
+    margin: 0px 5px;
+}
+
+.tabstyle {
+    border-radius: 5px 5px 0px 0px;
+    background-color: #aaa;
+    padding: 5px 5px 2px 5px;
+    display: inline;
+    margin-left: 2px;
+}
+
+.tabstyle .full {
+    display: none;
+}
+
+.tabstyle .abbrev {
+    display: inline;
+}
+
+.tabstyle:hover .full {
+    display: inline;
+}
+
+.tabstyle:hover .abbrev {
+    display: none;
+}
+
+.tabstyle .current .full{
+    display: inline;
+}
+
+.tabstyle .current .abbrev{
+    display: none;
+}
+
+
+.tabstyle .current {
+    color: #fff;
+}
+
+.nolink {
+    text-decoration: none;
+    color: black;
+}
+
 #values, #readings {
     width: 50%;
     display: inline;
@@ -92,9 +190,6 @@ canvas {
     margin-top: 40px;
 }
 
-body {
-    margin-bottom: 40px;
-}
 
 .data {
     padding: 10px;
@@ -135,5 +230,32 @@ body {
 }
 
 .defn {
+    font-weight: bold;
+}
+
+table.dataTable {
+    width: 100%;
+}
+
+#self_data_X td, #self_data_Y td {
+    vertical-align: top;
+}
+
+.dataInput {
+    box-sizing: border-box;
+    width: 100%;
+    height: 10em;
+    
+}
+
+.dataform h4 {
+    margin-top: 0px;
+}
+
+.coding {
+    width: 3em;
+}
+
+.tabname, .dataopt {
     font-weight: bold;
 }

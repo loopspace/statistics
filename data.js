@@ -1,6 +1,7 @@
 var Data;
 
 var distributions = [];
+var quantiles = [];
 var data_types = [];
 var precision = -1;
 
@@ -12,15 +13,29 @@ Data = function(s) {
     this.suffix = s;
 }
 
-Data.prototype.generate = function(m,s,n,d,t) {
+Data.prototype.generate = function(m,s,n,d,t,q) {
     this.gdata = [];
+    var dist;
+    if (q) {
+	dist = function (x) {
+	    return data_types[t](quantiles[d](x,m,s));
+	};
+    } else {
+	dist = function (x) {
+	    return data_types[t](distributions[d](Math.random(),m,s));
+	};
+    }
     for (var i=0;i<n;i++) {
-	this.gdata.push(data_types[t](distributions[d](m,s)));
+	this.gdata.push(dist((i+.5)/n));
     }
 }
 
 Data.prototype.add_data = function(d) {
     this.data = this.gdata.concat(d);
+}
+
+Data.prototype.set_data = function(d) {
+    this.gdata = d;
 }
 
 Data.prototype.initialise = function() {
@@ -97,17 +112,32 @@ Data.prototype.set_table = function(b) {
 }
 
 Data.prototype.write = function(id) {
+    if (!this.active) return;
     var datatxt = this.data.map(function(v) {return Math.round10(v,-1)}).join([separator = ', ']);
     this.set_field(id,datatxt);
 }
 
 Data.prototype.write_sorted = function(id) {
+    if (!this.active) return;
     var datatxt = this.sdata.map(function(v) {return Math.round10(v,-1)}).join([separator = ', ']);
     this.set_field(id,datatxt);
 }
 
+Data.prototype.write_pairs = function(id,d) {
+    if (!this.active) return;
+    if (!d.active) return;
+    var td = this.data.map(function(v) {return Math.round10(v,-1)});
+    var od = d.data.map(function(v) {return Math.round10(v,-1)});
+    var datatxt = [];
+    for (var i = 0; i < Math.min(td.length,od.length); i++) {
+	datatxt.push("(" + td[i] + "," + od[i] + ")");
+    }
+    this.set_field(id,datatxt.join([separator = ', ']),true);
+}
+
 /*
 Data.prototype.write_table = function(id) {
+    if (!this.active) return;
     var tblbdy = document.createElement('tbody');
     var nrow,ncell,ntxt,bbin,tbin;
     var bbin = this.bins.length;
@@ -149,6 +179,7 @@ Data.prototype.table_row = function(i) {
 
 /*
 Data.prototype.write_stem = function(id) {
+    if (!this.active) return;
     var sdata = this.data.map(function(v) {return Math.floor(v+.5)});
     sdata.sort(compareNumbers);
     tblbdy = document.createElement('tbody');
@@ -201,6 +232,7 @@ Data.prototype.prepare_stem = function(r) {
 }
 
 Data.prototype.write_below = function(id,p) {
+    if (!this.active) return;
     var n = 0;
     this.data.forEach( function(x) {
 	if (x < p) {
@@ -211,6 +243,7 @@ Data.prototype.write_below = function(id,p) {
 }
 
 Data.prototype.write_abelow = function(id,p,b) {
+    if (!this.active) return;
     var n = 0;
     var abelow; 
     if (p < b[0].lower) {
@@ -244,7 +277,13 @@ Data.prototype.mean = function() {
     return this.stats.mean;
 }
 
+Data.prototype.write_size = function(id) {
+    if (!this.active) return;
+    this.set_field(id,this.data.length);
+}
+    
 Data.prototype.write_mean = function(id) {
+    if (!this.active) return;
     this.set_field(id,Math.round10(this.mean(),precision));
 }
     
@@ -260,6 +299,7 @@ Data.prototype.variance = function() {
 }
 
 Data.prototype.write_variance = function(id) {
+    if (!this.active) return;
     this.set_field(id,Math.round10(this.variance(),precision));
 }
 
@@ -273,6 +313,7 @@ Data.prototype.stddev = function() {
 }
 
 Data.prototype.write_stddev = function(id) {
+    if (!this.active) return;
     this.set_field(id,Math.round10(this.stddev(),precision));
 }
 
@@ -288,6 +329,7 @@ Data.prototype.Sxx = function() {
 }
 
 Data.prototype.write_Sxx = function(id) {
+    if (!this.active) return;
     this.set_field(id,Math.round10(this.Sxx(),precision),true);
 }
 
@@ -308,6 +350,8 @@ Data.prototype.Sxy = function(d) {
 }
 
 Data.prototype.write_Sxy = function(id,d) {
+    if (!this.active) return;
+    if (!d.active) return;
     this.set_field(id,Math.round10(this.Sxy(d),precision),true);
 }
 
@@ -321,17 +365,49 @@ Data.prototype.pmcc = function(d) {
 }
 
 Data.prototype.write_pmcc = function(id,d) {
+    if (!this.active) return;
+    if (!d.active) return;
     this.set_field(id,Math.round10(this.pmcc(d),precision),true);
     
 }
 
-Data.prototype.write_regression = function(gid,yid,d) {
+Data.prototype.regression_gradient = function(d) {
+    if (!this.active) return;
+    if (!d.active) return;
     var sxy = this.Sxy(d);
     var sxx = this.Sxx();
-    this.set_field(gid,Math.round10(sxy/sxx,precision),true);
+    this.stats.gradient = sxy/sxx;
+    return this.stats.gradient;
+}
+
+Data.prototype.regression_yintercept = function(d) {
+    if (!this.active) return;
+    if (!d.active) return;
+    var g = this.regression_gradient(d);
     var xm = this.mean();
     var ym = d.mean();
-    this.set_field(yid,Math.round10(ym - sxy*xm/sxx,precision),true);
+    this.stats.yintercept = ym - g*xm;
+    return this.stats.yintercept;
+}
+
+Data.prototype.write_regression = function(gid,yid,eid,d) {
+    if (!this.active) return;
+    if (!d.active) return;
+    var b = this.regression_gradient(d);
+    var a = this.regression_yintercept(d);
+    this.write_linearguess(gid,yid,eid,b,a,d);
+}
+
+Data.prototype.write_linearguess = function(gid,yid,eid,b,a,d) {
+    if (!this.active) return;
+    if (!d.active) return;
+    this.set_field(gid,Math.round10(b,precision),true);
+    this.set_field(yid,Math.round10(a,precision),true);
+    var e = 0;
+    for (var i = 0; i < this.data.length; i++) {
+	e += (d.data[i] - this.data[i] * b - a)**2;
+    }
+    this.set_field(eid,Math.round10(e,precision),true);
 }
 
 Data.prototype.ntile = function(k,n) {
@@ -343,6 +419,7 @@ Data.prototype.ntile = function(k,n) {
 }
 
 Data.prototype.write_ntile = function(id,k,n) {
+    if (!this.active) return;
     this.set_field(id,Math.round10(this.ntile(k,n),precision));
 }
 
@@ -356,6 +433,7 @@ Data.prototype.median = function(id) {
 }
 
 Data.prototype.write_median = function(id) {
+    if (!this.active) return;
     this.set_field(id,Math.round10(this.median(),precision));
 }
 
@@ -368,6 +446,7 @@ Data.prototype.lowerquartile = function() {
 }
 
 Data.prototype.write_lowerquartile = function(id) {
+    if (!this.active) return;
     this.set_field(id,Math.round10(this.lowerquartile(),precision));
 }
 
@@ -380,6 +459,7 @@ Data.prototype.upperquartile = function() {
 }
 
 Data.prototype.write_upperquartile = function(id) {
+    if (!this.active) return;
     this.set_field(id,Math.round10(this.upperquartile(),precision));
 }
 
@@ -388,10 +468,12 @@ Data.prototype.interquartilerange = function() {
 }
 
 Data.prototype.write_interquartilerange = function(id) {
+    if (!this.active) return;
     this.set_field(id,Math.round10(this.interquartilerange(),precision));
 }
 
 Data.prototype.write_skewmedian = function(id) {
+    if (!this.active) return;
     var m = this.mean();
     var md = this.median();
     var s = this.stddev();
@@ -399,6 +481,7 @@ Data.prototype.write_skewmedian = function(id) {
 }
 
 Data.prototype.write_skewmode = function(id) {
+    if (!this.active) return;
     var m = this.mean();
     var md = this.mode();
     var s = this.stddev();
@@ -406,6 +489,7 @@ Data.prototype.write_skewmode = function(id) {
 }
 
 Data.prototype.write_skewquartile = function(id) {
+    if (!this.active) return;
     var qa = this.ntile(1,4);
     var md = this.ntile(2,4);
     var qb = this.ntile(3,4);
@@ -428,6 +512,7 @@ Data.prototype.entile = function(k,n,b) {
 }
 
 Data.prototype.write_entile = function(id,k,n,b) {
+    if (!this.active) return;
     this.set_field(id,Math.round10(this.entile(k,n,b),precision));
 }
 
@@ -440,6 +525,7 @@ Data.prototype.binlowerquartile = function(b) {
 }
 
 Data.prototype.write_binlowerquartile = function(id,b) {
+    if (!this.active) return;
     this.set_field(id,Math.round10(this.binlowerquartile(b),precision));
 }
 
@@ -452,6 +538,7 @@ Data.prototype.binupperquartile = function(b) {
 }
 
 Data.prototype.write_binupperquartile = function(id,b) {
+    if (!this.active) return;
     this.set_field(id,Math.round10(this.binupperquartile(b),precision));
 }
 
@@ -475,6 +562,7 @@ Data.prototype.binmean = function(b) {
 }
 
 Data.prototype.write_binmean = function(id,b) {
+    if (!this.active) return;
     this.set_field(id,Math.round10(this.binmean(b),precision));
 }
 
@@ -499,6 +587,7 @@ Data.prototype.binvariance = function(b) {
 }
 
 Data.prototype.write_binvariance = function(id,b) {
+    if (!this.active) return;
     this.set_field(id,Math.round10(this.binvariance(b),precision));
 }
 
@@ -512,6 +601,7 @@ Data.prototype.binstddev = function(b) {
 }
 
 Data.prototype.write_binstddev = function(id,b) {
+    if (!this.active) return;
     this.set_field(id,Math.round10(this.binstddev(b),precision));
 }
 
@@ -524,6 +614,7 @@ Data.prototype.binmedian = function(b) {
 }
 
 Data.prototype.write_binmedian = function(id,b) {
+    if (!this.active) return;
     this.set_field(id,Math.round10(this.binmedian(b),precision));
 }
 
@@ -532,6 +623,7 @@ Data.prototype.bininterquartilerange = function(b) {
 }
 
 Data.prototype.write_bininterquartilerange = function(id,b) {
+    if (!this.active) return;
     this.set_field(id,Math.round10(this.bininterquartilerange(b),precision));
 }
 
@@ -552,6 +644,7 @@ Data.prototype.modal = function() {
 }
 
 Data.prototype.write_modal = function(id,b) {
+    if (!this.active) return;
     var i = this.modal();
     str = b[i].labelpre + b[i].labelpost;
     this.set_field(id,str);
@@ -585,18 +678,22 @@ Data.prototype.mode = function () {
 }
 
 Data.prototype.write_mode = function(id) {
+    if (!this.active) return;
     this.set_field(id,this.mode());
 }
 
 
 
 Data.prototype.draw_histogram = function(ctx,pos,scale,hbin,bins) {
+    if (!this.active) return;
     var tm;
     ctx.save();
     ctx.strokeStyle = "black";
+    ctx.lineWidth = 2;
     for (var i=0; i<this.bins.length;i++) {
 	ctx.fillStyle = 'gray';
-	ctx.fillRect(bins[i].lower*scale,0,(bins[i].upper-bins[i].lower)*scale,-this.bins[i]*hbin);
+	ctx.fillRect(bins[i].lower*scale,0,(bins[i].upper-bins[i].lower)*scale,-this.bins[i]*hbin/(bins[i].upper-bins[i].lower));
+	ctx.strokeRect(bins[i].lower*scale,0,(bins[i].upper-bins[i].lower)*scale,-this.bins[i]*hbin/(bins[i].upper-bins[i].lower));
 	if (this.bins[i] != 0) {
 	    tm = ctx.measureText(this.bins[i]);
 	    ctx.fillStyle = 'black';
@@ -625,6 +722,7 @@ Data.prototype.draw_histogram = function(ctx,pos,scale,hbin,bins) {
 }
 
 Data.prototype.draw_boxplot = function(ctx,s) {
+    if (!this.active) return;
 /*    clear(ctx);
     ctx.translate(0,ctx.canvas.height);
     ctx.translate(10,-20);
@@ -676,7 +774,7 @@ Data.prototype.draw_boxplot = function(ctx,s) {
 
 function mark(c,x,y) {
     c.beginPath();
-    c.arc(x,y,values.radius,0,360);
+    c.arc(x,y,2,0,360);
     c.fill();
 }
 
@@ -717,7 +815,10 @@ var compareNumbers = function(a,b) {
 var makeGauss = function() {
     var g;
 
-    return function (m,s) {
+    /*
+      Implementation means that we can guarentee that xx is U(0,1)
+     */
+    return function (xx,m,s) {
 	if (g != null) {
 	    var gg = g;
 	    g = null;
@@ -726,7 +827,7 @@ var makeGauss = function() {
 	var u = 1;
 	var v = 1;
 	while (u*u + v*v > 1) {
-	    u = 2 * Math.random() - 1;
+	    u = 2 * xx - 1;
 	    v = 2 * Math.random() - 1; 
 	}
 	var r = u*u + v*v;
@@ -740,27 +841,190 @@ var makeGauss = function() {
 
 var gaussian = makeGauss();
 
-var uniform =  function(m,s) {
-    return (2 * Math.random() - 1)*s*Math.sqrt(3) + m;
+var uniform =  function(x,m,s) {
+    return (2 * x - 1)*s*Math.sqrt(3) + m;
 }
 
-var exponential = function(m,s) {
-    return -Math.log(1 - Math.random())*s + m - s;
+var exponential = function(x,m,s) {
+    return -Math.log(1 - x)*s + m - s;
 }
 
-var lognormal = function(m,s) {
+var lognormal = function(x,m,s) {
     var ms = m*m;
     var v = s*s;
     var mu = Math.log(ms/Math.sqrt(v + ms));
     var sigma = Math.sqrt(Math.log(1 + v/ms));
-    return Math.exp(gaussian(mu,sigma));
+    return Math.exp(gaussian(x,mu,sigma));
+}
+
+/*
+  if x == 0, return 0
+  if x != 0, work in log space
+  
+  nk is log( nCk ) so updates via
+  nCk = nC(k-1) * (n-k+1)/k
+  nk += log(n-k+1) - log(k)
+  starts with nk = 0
+  
+  np is log(p^k q^(n-k))
+  p^k q^(n-k) = p^(k-1) q^(n-k+1) * p/q
+  np += log(p) - log(q)
+  starts with np = n log(p)
+*/
+var binomial = function(x,n,p) {
+    var q,k,nk,np;
+    if (x == 0)
+	return 0;
+    if (p <= 0)
+	return 0;
+    if (p >= 1)
+	return n;
+    
+    q = Math.log(1 - p);
+    p = Math.log(p);
+    k = 0;
+    nk = 0;
+    np = n * q;
+    x -= Math.exp(np);
+    
+    while (x > 0 && k < n) {
+	k++;
+	nk += Math.log(n - k + 1) - Math.log(k); // log nCk
+	np += p - q; // log p^k q^(n-k)
+	x -= Math.exp(nk + np);
+    }
+    return k;
+   
+}
+
+var binomial_test = function(n,p) {
+    var pr = [];
+    for (var k = 0; k <= n; k++) {
+	pr.push(binomial(k/n,n,p));
+    }
+    return pr;
+}
+
+// console.log(binomial_test(12,.1));
+
+/*
+  x ~ U(0,1)
+  if x == 0, return 0
+  if x != 0, work in log space
+  
+  nk is log( e^(-l) l^k/k! ) so updates via
+  nk += log(l) - log(k)
+  starts with nk = -l
+  
+*/
+var poisson = function(x,l,s) {
+    // lambda = l
+    var k,nk;
+    if (x == 0)
+	return 0;
+    if (l <= 0)
+	return 0;
+    nk = -l;
+    l = Math.log(l);
+    k = 0;
+    x -= Math.exp(nk);
+    
+    while (x > 0) {
+	k++;
+	nk += l - Math.log(k);
+	x -= Math.exp(nk);
+    }
+    return k;
+}
+
+var poisson_test = function(l) {
+    var pr = [];
+    for (var i = 0; i < 20; i++) {
+	pr.push(poisson(i/20,l));
+    }
+    return pr;
+}
+
+// console.log(poisson_test(5,0));
+
+var uniformd = function(x,m,s) {
+    // 1 to m inclusive, ignore s
+    return Math.floor(m * x) + 1;
+}
+
+function erf(x) {
+    var t = 1/(1 + .5*Math.abs(x));
+    var p = -x * x
+	- 1.26551223
+	+ t * ( 1.00002368
+		+ t * ( 0.37409196
+			+ t * ( 0.09678418
+				+ t * ( -0.18628806
+					+ t * ( 0.27886807
+						+ t * (- 1.13520398
+						       + t * ( 1.48851587
+							       + t * (- 0.82215223
+								      + t * 0.17087277
+								     ))))))))
+    ;
+    var tau = t * Math.exp(p);
+    if (x >= 0)
+	return 1 - tau;
+    return tau - 1;
+}
+
+function erfinv(x) {
+    var a = -16;
+    var b = 16;
+    var m,p;
+    for (var i = 0; i < 25; i++) {
+	m = (a + b)/2;
+	p = erf(m);
+	if (p == x)
+	    return m;
+	if (p < x) {
+	    a = m;
+	} else {
+	    b = m;
+	}
+    }
+    return m;
+}
+
+function normalsQ(q) {
+    return Math.sqrt(2) * erfinv(2 * q - 1);
+}
+
+function normalQ(q,m,s) {
+    return normalsQ(q) * s + m;
+}
+
+function lognormalQ(q,m,s) {
+    var ms = m*m;
+    var v = s*s;
+    var mu = Math.log(ms/Math.sqrt(v + ms));
+    var sigma = Math.sqrt(Math.log(1 + v/ms));
+    return Math.exp(normalQ(q,mu,sigma));
 }
 
 distributions = [
     gaussian,
     exponential,
     uniform,
-    lognormal
+    lognormal,
+    binomial,
+    poisson,
+    uniformd
+];
+
+quantiles = [
+    normalQ,
+    exponential,
+    uniform,
+    lognormalQ,
+    binomial,
+    poisson,
+    uniformd
 ];
 
 data_types = [

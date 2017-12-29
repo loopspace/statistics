@@ -11,21 +11,52 @@ var offset = 0;
 
 var pos;
 var mouseClicked;
+var yintercept;
+var gradient;
+
+var distributions = [
+    gaussian,
+    exponential,
+    uniform,
+    lognormal,
+    binomial,
+    poisson,
+    uniformd
+];
+
+
+var tabs = [
+    ["datadef","datadefdiv"],
+    ["rawdata","rawdatadiv"],
+//    ["sortdata","sortdatadiv"],
+    ["datarep","datarepdiv"],
+    ["freqtab","freqtabdiv"],
+    ["stem","stemdiv"],
+    ["hist","histdiv"],
+    ["box","boxdiv"],
+    ["samstat","samstatdiv"],
+    ["correl","correldiv"],
+    ["help","helpdiv"]
+];
 
 function init() {
     data_X = new Data('X');
     data_Y = new Data('Y');
     var histogram = document.querySelector("#histogram");
-    histogram.addEventListener("mousedown",doMouseDown,false);
-    histogram.addEventListener("mouseup",doMouseUp,false);
-    histogram.addEventListener("mouseout",doMouseOut,false);
-    histogram.addEventListener("mousemove",doMouseMove,false);
+    histogram.addEventListener("mousedown",doHistMouseDown,false);
+    histogram.addEventListener("mouseup",doHistMouseUp,false);
+    histogram.addEventListener("mouseout",doHistMouseOut,false);
+    histogram.addEventListener("mousemove",doHistMouseMove,false);
     hctx = histogram.getContext("2d");
 
     var boxplot = document.querySelector("#boxplot");
     bctx = boxplot.getContext("2d");
 
     var scatterplot = document.querySelector('#scatter');
+    scatterplot.addEventListener("mousedown",doScatterMouseDown,false);
+    scatterplot.addEventListener("mouseup",doScatterMouseUp,false);
+    scatterplot.addEventListener("mouseout",doScatterMouseOut,false);
+    scatterplot.addEventListener("mousemove",doScatterMouseMove,false);
     sctx = scatterplot.getContext('2d');
     
     var elts = document.querySelector("#form").elements;
@@ -34,11 +65,12 @@ function init() {
     }
     
     for (var i=0, element; element = elts[i++];) {
-	if (element.type === "text")
+	if (element.type === "text" || element.type === "textarea")
     	    element.onkeypress = checkReturn;
 	if (element.type === "select-one")
     	    element.onchange = getValues;
     }
+
     var correlate = document.querySelector('#correlate');
     correlate.onchange = setCorrelation;
     setCorrelation_aux(correlate);
@@ -47,24 +79,83 @@ function init() {
     coding.onchange = setCoding;
     setCoding_aux(coding);
 
+    var quantiles = document.querySelector('#quantiles');
+    quantiles.onchange = setQuantiles;
+    setQuantiles_aux(quantiles);
+
     var enable = document.querySelector('#enable_Y');
     enable.onchange = activateY;
     activateY_aux(enable);
 
+    var auto_X = document.querySelector('#auto_X');
+    auto_X.onchange = autoX;
+    auto_aux(auto_X,"X");
+    
+    var auto_Y = document.querySelector('#auto_Y');
+    auto_Y.onchange = autoY;
+    auto_aux(auto_Y,"Y");
+    
     var classes = document.querySelector('#even');
     classes.onchange = evenClasses;
     evenClasses_aux(classes);
     
     var button = document.querySelector("#reset");
     button.onclick = function() {getValues(true); return false;};
+
+    button = document.querySelector("#regroup");
+    button.onclick = getValues;
+
+    button = document.querySelector("#resetre");
+    button.onclick = function () {
+	if (typeof MathJax !== 'undefined') {
+	    MathJax.Hub.Queue(writeCorrelation);
+	    MathJax.Hub.Queue(["Typeset",MathJax.Hub,'corrmathml']);
+	} else {
+	    writeCorrelation();
+	}
+    }
+    
     var plus = document.querySelector('#add_1');
     plus.onclick = function(e) {addQuantile(e.target);
 	return false;};
     
-    elts = document.getElementsByClassName('arrow');
+/*    elts = document.getElementsByClassName('arrow');
     for (var i=0, element; element = elts[i++];) {
 	element.onclick = toggle_div;
     }
+*/
+    var tab;
+    for (var i = 0; i < tabs.length; i++) {
+	tabs[i][0] = document.getElementById(tabs[i][0]);
+	tabs[i][1] = document.getElementById(tabs[i][1]);
+	tabs[i][0].dataset.index = i;
+	tabs[i][0].addEventListener('click', function(e) {
+	    e.preventDefault();
+	    var i = e.currentTarget.dataset.index;
+	    for (var j = 0; j < tabs.length; j++) {
+		tabs[j][1].style.display = 'none';
+		tabs[j][0].classList.remove('current');
+	    }
+	    tabs[i][1].style.display = 'block';
+	    tabs[i][0].classList.add('current');
+	});
+	tabs[i][1].style.display = 'none';
+	tabs[i][0].classList.remove('current');
+    }
+    tabs[0][1].style.display = 'block';
+    tabs[0][0].classList.add('current');
+
+    /*
+    var eyrow = document.getElementById("enableYrow")
+    var ayrect = eyrow.getBoundingClientRect();
+    var axtable = document.getElementById("autoXtable")
+    var axrow = document.getElementById("autoXrow")
+    var axrect = axrow.getBoundingClientRect();
+    axtable.style.paddingTop = (ayrect.bottom - axrect.top) + 'px';
+    */
+
+    window.addEventListener('resize',resize);
+    resize();
     
     setSize(histogram);
     setSize(boxplot);
@@ -72,6 +163,14 @@ function init() {
     getValues();
 }
 
+window.addEventListener("load",init);
+
+function resize() {
+    var mdiv = document.getElementById('main');
+    var rect = mdiv.getBoundingClientRect();
+    var ht = document.documentElement.clientHeight - rect.top - 100;
+    mdiv.style.height = Math.floor(ht) + 'px';
+}
 
 function getValues (redo) {
     var elts = document.querySelector("#form").elements;
@@ -85,14 +184,16 @@ function getValues (redo) {
     var ename;
     for (var i=0, element; element = elts[i++];) {
 	ename = element.name.substring(0,element.name.indexOf('_'));
-	if (element.type === "text") {
+	if (element.type === "text" || element.type == "textarea") {
 	    if (element.name === "classes") {
 		values[element.name] = element.value.toString();
-	    } else if (ename === "edata") {
+	    } else if (ename === "edata" || ename === "adata") {
 		if (element.value != '') {
 		    ndarr = element.value.split(/\s*[\s,;]+\s*/);
-		    ndarr = ndarr.map(function(d) {return parseFloat(d)});
+		    ndarr = ndarr.map(function(d) {return parseFloat(d)}).filter(function(d) {return !Number.isNaN(d)});
 		    values[element.name] = ndarr;
+		} else {
+		    values[element.name] = [];
 		}
 	    } else {
 		x = parseFloat(element.value);
@@ -124,25 +225,62 @@ function getValues (redo) {
 
     values.number_X = parseInt(values.number_X,10);
     values.number_Y = parseInt(values.number_Y,10);
-    if (values.correlate || values.coding) {
+
+    if (values.correlate || values.coding || values.quantiles) {
 	values.number_Y = values.number_X;
+    }
+    if (values.correlate || values.coding) {
 	values.distribution_Y = values.distribution_X;
     }
 
-    if (values.type == 1) {
+    if (values.type == 2) {
 	toggleClass('cts',false);
 	toggleClass('discrete',true);
+	toggleElts('ctsdist',false,true);
+	toggleElts('discretedist',true,true);
+	if (values.distribution_X < 4) {
+	    values.distribution_X = 4;
+	    document.getElementById('defdisc_X').selected = true;
+	}
+	if (values.distribution_Y < 4) {
+	    values.distribution_Y = 4;
+	    document.getElementById('defdisc_Y').selected = true;
+	}
+	setDistOptions(values.distribution_X,"X");
+	setDistOptions(values.distribution_Y,"Y");
     } else {
 	toggleClass('discrete',false);
 	toggleClass('cts',true);
+	toggleElts('ctsdist',true,true);
+	toggleElts('discretedist',false,true);
+	if (values.distribution_X > 3) {
+	    values.distribution_X = 0;
+	    document.getElementById('defcts_X').selected = true;
+	}
+	if (values.distribution_Y > 3) {
+	    values.distribution_Y = 0;
+	    document.getElementById('defcts_Y').selected = true;
+	}
+	setDistOptions(values.distribution_X,"X");
+	setDistOptions(values.distribution_Y,"Y");
     }
-    
+    if (values.correlate || values.coding)
+	enableElt('stddev_Y',false);
+
     if (redo) {
 	// Regenerate random data
-	data_X.generate(values.mean_X,values.stddev_X,values.number_X,values.distribution_X,values.type);
+	if (values.auto_X) {
+	    data_X.generate(values.mean_X,values.stddev_X,values.number_X,values.distribution_X,values.type,false);
+	} else {
+	    data_X.set_data(values.adata_X);
+	}
     }
     if (redo || values.correlate) {
-	data_Y.generate(values.mean_Y,values.stddev_Y,values.number_Y,values.distribution_Y,values.type);
+	if (values.auto_Y) {
+	    data_Y.generate(values.mean_Y,values.stddev_Y,values.number_Y,values.distribution_Y,values.type,values.quantiles);
+	} else {
+	    data_Y.set_data(values.adata_Y);
+	}
     }
     if (values.correlate) {
 	data_Y.correlate(data_X,values.correlation||0);
@@ -167,9 +305,26 @@ function getValues (redo) {
 	}
     }
 
+    if (values.quantiles) {
+	var xdata = [];
+	for (var i = 0; i < data_X.gdata.length; i++) {
+	    xdata.push([data_X.gdata[i],i]);
+	}
+	xdata.sort(function(a,b) { return a[0] - b[0] });
+	var ydata = [];
+	for (var i = 0; i < data_Y.gdata.length; i++) {
+	    ydata[xdata[i][1]] = data_Y.gdata[i];
+	}
+	data_Y.gdata = ydata;
+    }
+    
     data_X.add_data(values.edata_X||[]);
     data_X.initialise();
 
+    if (! data_X.has_data()) {
+	return false;
+    }
+    
     if (values.coding) {
 	var d = [];
 	data_X.data.forEach (function (x) { d.push(values.coding_a * x + values.coding_b) });
@@ -179,20 +334,15 @@ function getValues (redo) {
     }
     data_Y.initialise();
 
-    if (data_X.data.length == data_Y.data.length) {
-	document.getElementById('correlationStatistics').style.display = 'block';
-    } else {
-	document.getElementById('correlationStatistics').style.display = 'none';
+    if (! data_Y.has_data()) {
+	data_Y.enable(false);
     }
-    
-
     
     bins = [];
     var lv,hv,lbls,lble;
     if (values.even) {
-	lv = Math.floor((Math.min(data_X.sdata[0],data_Y.sdata[0]) - values.classb)/values.classw);
-	hv = Math.ceil((Math.max(data_X.sdata[data_X.sdata.length-1],data_Y.sdata[data_Y.sdata.length-1]) - values.classb)/values.classw);
-
+	lv = Math.floor((getMinimum(data_X,data_Y) - values.classb)/values.classw);
+	hv = Math.ceil((getMaximum(data_X,data_Y) - values.classb)/values.classw)+1;
 	for (var i=0; i< hv-lv; i++) {
 	    if (values.type == 1 && values.classw == 1) {
 		lbls = ((i + lv)*values.classw + values.classb).toString();
@@ -206,8 +356,8 @@ function getValues (redo) {
     } else {
 	values.classes = values.classes || '';
 	values.classes = values.classes.toString();
-	lv = Math.floor(Math.min(data_X.sdata[0],data_Y.sdata[0])) - 1;
-	hv = Math.ceil(Math.max(data_X.sdata[data_X.sdata.length-1],data_Y.sdata[data_Y.sdata.length-1])) + 1;
+	lv = Math.floor(getMinimum(data_X,data_Y)) - 1;
+	hv = Math.ceil(getMaximum(data_X,data_Y)) + 1;
 	var lvs = values.classes.split(/\s*[\s,;]+\s*/);
 	lvs = lvs.map(function(d) {return parseFloat(d)});
 	lvs.sort(compareNumbers);
@@ -245,9 +395,10 @@ function getValues (redo) {
     data_Y.write_abelow('abelow',pos,bins);
     document.querySelector('#mark').innerHTML = Math.floor(pos);
     
+    data_X.write_size('size');
     data_X.write_mean('smean');
     data_X.write_median('smedian');
-    if (values.type == 1) {
+    if (values.type == 2) {
 	data_X.write_mode('smode');
     } else {
 	data_X.write_modal('smode',bins);
@@ -271,6 +422,8 @@ function getValues (redo) {
     data_X.write('data');
     data_X.write_sorted('sdata');
 
+    
+    data_Y.write_size('size');
     data_Y.write_mean('smean');
     data_Y.write_median('smedian');
     if (values.type == 1) {
@@ -322,6 +475,7 @@ function getValues (redo) {
     
     data_Y.write('data');
     data_Y.write_sorted('sdata');
+    data_X.write_pairs('data_XY',data_Y);
 
     // Correlation
     // As these are inside a MathML element, we need to inform MathJax that we're changing them.
@@ -364,6 +518,11 @@ function getValues (redo) {
     tbl.replaceChild(tblbdy,otblbdy);
     tblbdy.id = 'freqrows';
     toggleClass('second',data_Y.active);
+    if (data_Y.active && (data_X.data.length == data_Y.data.length)) {
+	toggleClass('correlate',true);
+    } else {
+	toggleClass('correlate',false);
+    }
     
     // Stem and Leaf
     stem();
@@ -383,7 +542,10 @@ function writeCorrelation() {
     data_Y.write_Sxx('Syy');
     data_X.write_Sxy('Sxy',data_Y);
     data_X.write_pmcc('pmcc',data_Y);
-    data_X.write_regression('gradient','intercept',data_Y);
+    data_X.write_regression('gradient','intercept','error',data_Y);
+    gradient = data_X.regression_gradient(data_Y);
+    yintercept = data_X.regression_yintercept(data_Y);
+    scatter();
 }
 
 function getRelativeCoords(event) {
@@ -393,7 +555,7 @@ function getRelativeCoords(event) {
 
 function recalc(e) {
     var coords = getRelativeCoords(e);
-    pos = (coords.x - parseInt(window.getComputedStyle(hctx.canvas).marginLeft,10) - parseInt(window.getComputedStyle(hctx.canvas).marginRight,10) + offset)/ascale;
+    pos = (coords.x + offset - 20)/ascale;
     data_X.write_below('below',pos);
     data_X.write_abelow('abelow',pos,bins);
     data_Y.write_below('below',pos);
@@ -402,23 +564,61 @@ function recalc(e) {
     plots();
 }
 
-function doMouseDown(e) {
+function doHistMouseDown(e) {
     mouseClicked = true;
     recalc(e);
 }
-function doMouseUp(e) {
+function doHistMouseUp(e) {
     mouseClicked = false;
 }
-function doMouseOut(e) {}
-function doMouseMove(e) {
+function doHistMouseOut(e) {}
+function doHistMouseMove(e) {
     if (mouseClicked) {
 	recalc(e);
     }
 }
 
+function doScatterMouseDown(e) {
+    mouseClicked = true;
+    adjustRegression(e);
+}
+function doScatterMouseUp(e) {
+    mouseClicked = false;
+}
+function doScatterMouseOut(e) {
+}
+function doScatterMouseMove(e) {
+    if (mouseClicked) {
+	adjustRegression(e);
+    }
+}
+
+function adjustRegression(e) {
+    var coords = getRelativeCoords(e);
+    var x,y;
+    var lx,hx,ly,hy,s;
+    var w = 10;
+    lx = Math.floor(Math.min(0,data_X.sdata[0])/w)*w;
+    ly = Math.floor(Math.min(0,data_Y.sdata[0])/w)*w;
+    hx = Math.ceil(Math.max(0,data_X.sdata[data_X.sdata.length-1])/w)*w;
+    hy = Math.ceil(Math.max(0,data_Y.sdata[data_Y.sdata.length-1])/w)*w;
+    s = Math.min(scale,(hctx.canvas.width-50)/(hx-lx));
+
+    x = (coords.x - 20)/s + lx;
+    y = hy - (coords.y - 20)/s + ly;
+    var cx = (hx + lx)/2;
+    if ( Math.abs(x - cx) > (hx - lx)/4) {
+	var cy = gradient * cx + yintercept
+	gradient = (y - cy)/(x - cx);
+    }
+    yintercept = y - gradient * x;
+    scatter();
+    data_X.write_linearguess('gradient','intercept','error',gradient,yintercept,data_Y);
+}
+
 
 function setSize(cvs) {
-    cvs.width=document.body.clientWidth - parseInt(window.getComputedStyle(cvs).marginLeft,10) - parseInt(window.getComputedStyle(cvs).marginRight,10);
+    cvs.width=parseInt(window.getComputedStyle(document.getElementById('main')).width,10) - parseInt(window.getComputedStyle(cvs).marginLeft,10) - parseInt(window.getComputedStyle(cvs).marginRight,10);
 }
 
 function checkReturn(e) {
@@ -485,6 +685,30 @@ function compareNumbers(a,b) {
     return a - b;
 }
 
+function getMinimum(dx,dy) {
+    if (dx.has_data() && dy.has_data()) {
+	return Math.min(dx.sdata[0],dy.sdata[0]);
+    } else if (dx.has_data()) {
+	return dx.sdata[0];
+    } else if (dy.has_data()) {
+	return dy.sdata[0];
+    } else {
+	return 0;
+    }
+}
+
+function getMaximum(dx,dy) {
+    if (dx.has_data() && dy.has_data()) {
+	return Math.max(dx.sdata[dx.sdata.length-1],dy.sdata[dy.sdata.length-1]);
+    } else if (dx.has_data()) {
+	return dx.sdata[dx.sdata.length-1];
+    } else if (dy.has_data()) {
+	return dy.sdata[dy.sdata.length-1];
+    } else {
+	return 10;
+    }
+}
+
 function toggle_div(e) {
     var dv;
     var src;
@@ -511,17 +735,13 @@ function setCorrelation(e) {
 }
 
 function setCorrelation_aux(e) {
+    enableYparameters(!e.checked);
+    document.getElementsByName('correlation')[0].disabled = !e.checked;
     if (e.checked) {
-	document.getElementsByName('distribution_Y')[0].disabled = true;
-	document.getElementsByName('number_Y')[0].disabled = true;
-	document.getElementsByName('correlation')[0].disabled = false;
 	document.getElementsByName('coding_a')[0].disabled = true;
 	document.getElementsByName('coding_b')[0].disabled = true;
 	document.getElementsByName('coding')[0].checked = false;
-    } else {
-	document.getElementsByName('distribution_Y')[0].disabled = false;
-	document.getElementsByName('number_Y')[0].disabled = false;
-	document.getElementsByName('correlation')[0].disabled = true;
+	document.getElementsByName('quantiles')[0].checked = false;
     }
 }
 
@@ -530,32 +750,71 @@ function setCoding(e) {
     getValues();
 }
 
-
 function setCoding_aux(e) {
+    enableYparameters(!e.checked);
+    document.getElementsByName('coding_a')[0].disabled = !e.checked;
+    document.getElementsByName('coding_b')[0].disabled = !e.checked;
     if (e.checked) {
-	document.getElementsByName('distribution_Y')[0].disabled = true;
-	document.getElementsByName('number_Y')[0].disabled = true;
-	document.getElementsByName('correlation')[0].disabled = true;
-	document.getElementsByName('coding_a')[0].disabled = false;
-	document.getElementsByName('coding_b')[0].disabled = false;
 	document.getElementsByName('correlate')[0].checked = false;
-    } else {
-	document.getElementsByName('distribution_Y')[0].disabled = false;
-	document.getElementsByName('number_Y')[0].disabled = false;
+	document.getElementsByName('quantiles')[0].checked = false;
+	document.getElementsByName('correlation')[0].disabled = true;
+    }
+}
+
+function setQuantiles(e) {
+    setQuantiles_aux(e.target);
+    getValues();
+}
+
+function setQuantiles_aux(e) {
+    enableYparameters(!e.checked);
+    if (e.checked) {
 	document.getElementsByName('coding_a')[0].disabled = true;
 	document.getElementsByName('coding_b')[0].disabled = true;
+	document.getElementsByName('correlation')[0].disabled = true;
+	document.getElementsByName('correlate')[0].checked = false;
+	document.getElementsByName('coding')[0].checked = false;
+	document.getElementsByName('mean_Y')[0].disabled = false;
+	document.getElementsByName('stddev_Y')[0].disabled = false;
+    }
+}
+
+function enableYparameters(e) {
+    document.getElementsByName('number_Y')[0].disabled = !e;
+    document.getElementsByName('mean_Y')[0].disabled = !e;
+    document.getElementsByName('stddev_Y')[0].disabled = !e;
+}
+
+function autoX(e) {
+    auto_aux(e.target,"X");
+}
+
+function autoY(e) {
+    auto_aux(e.target,"Y");
+}
+
+function auto_aux(e,s) {
+    if (e.checked) {
+	document.getElementById("auto_data_" + s).style.display = "table-row-group";
+	document.getElementById("self_data_" + s).style.display = "none";
+    } else {
+	document.getElementById("self_data_" + s).style.display = "table-row-group";
+	document.getElementById("auto_data_" + s).style.display = "none";
     }
 }
 
 function activateY(e) {
     activateY_aux(e.target);
+    /*
     stem();
     plots();
     scatter();
+*/
 }
 
 function activateY_aux(e) {
     data_Y.enable(e.checked);
+    /*
     document.getElementsByName('distribution_Y')[0].disabled = !e.checked;
     document.getElementsByName('number_Y')[0].disabled = !e.checked;
     document.getElementsByName('mean_Y')[0].disabled = !e.checked;
@@ -566,8 +825,13 @@ function activateY_aux(e) {
     document.getElementsByName('coding')[0].disabled = !e.checked;
     document.getElementsByName('coding_a')[0].disabled = !e.checked;
     document.getElementsByName('coding_b')[0].disabled = !e.checked;
-
+*/
     toggleClass('second',e.checked);
+    if (e.checked && (data_X.data.length == data_Y.data.length)) {
+	toggleClass('correlate',true);
+    } else {
+	toggleClass('correlate',false);
+    }
 }
 
 function evenClasses(e) {
@@ -587,6 +851,39 @@ function evenClasses_aux(e) {
     }
 }
 
+function setDistOptions(v,s) {
+    if (v == 4) { // Binomial
+	toggleElt('cts_mean_' + s,false);
+	toggleElt('binomial_mean_' + s,true);
+	toggleElt('uniformd_mean_' + s,false);
+	toggleElt('cts_stddev_' + s,false);
+	toggleElt('binomial_stddev_' + s,true);
+	enableElt('stddev_' + s,true)
+    } else if (v == 5) { // Poisson
+	toggleElt('cts_mean_' + s,true);
+	toggleElt('binomial_mean_' + s,false);
+	toggleElt('uniformd_mean_' + s,false);
+	toggleElt('cts_stddev_' + s,false);
+	toggleElt('binomial_stddev_' + s,false);
+	enableElt('stddev_' + s,false)
+    } else if (v == 6) { // Uniform discrete
+	toggleElt('cts_mean_' + s,false);
+	toggleElt('binomial_mean_' + s,false);
+	toggleElt('uniformd_mean_' + s,true);
+	toggleElt('cts_stddev_' + s,false);
+	toggleElt('binomial_stddev_' + s,false);
+	enableElt('stddev_' + s,false)
+    } else { // All continuous
+	toggleElt('cts_mean_' + s,true);
+	toggleElt('binomial_mean_' + s,false);
+	toggleElt('uniformd_mean_' + s,false);
+	toggleElt('cts_stddev_' + s,true);
+	toggleElt('binomial_stddev_' + s,false);
+	enableElt('stddev_' + s,true)
+    }
+}
+
+
 function toggleClass(c,b) {
     var elts = document.getElementsByClassName(c);
     var vis;
@@ -597,6 +894,33 @@ function toggleClass(c,b) {
     }
     for (var i=0, elt; elt = elts[i]; i++)
 	elt.style.display = vis;
+}
+
+function toggleElts(c,b,e) {
+    if (e) {
+	toggleElt(c + "_X",b);
+	toggleElt(c + "_Y",b);
+    } else {
+	toggleElt(c,b);
+    }
+}
+
+function toggleElt(c,b) {
+    var elt = document.getElementById(c);
+    if (!elt)
+	console.log(c);
+    var vis;
+    if (b) {
+	vis = '';
+    } else {
+	vis = 'none';
+    }
+    elt.style.display = vis;
+}
+
+function enableElt(c,b) {
+    var elt = document.getElementById(c);
+    elt.disabled = !b;
 }
 
 function blank(id) {
@@ -666,11 +990,16 @@ function clear(c) {
 function drawAxes(c,lx,ux,s,b) {
     var height = c.canvas.height;
     c.beginPath();
-    c.moveTo(0,10);
-    c.lineTo(0,-height + 10);
+    if (lx < 0 && ux > 0) {
+	c.moveTo(0,10);
+	c.lineTo(0,-height + 10);
+    } else {
+	c.moveTo(lx*s-10,10);
+	c.lineTo(lx*s-10,-height + 10);
+    }
     c.stroke();
     c.beginPath();
-    c.moveTo(-10+lx*s,0);
+    c.moveTo(-20+lx*s,0);
     c.lineTo(ux*s + 10,0);
     c.stroke();
     c.beginPath();
@@ -690,24 +1019,41 @@ function drawAxes(c,lx,ux,s,b) {
 }
 
 function plots() {
-    var lx,hx,s,vs;
-    lx = Math.min(0,bins[0].lower);
+    var lx,hx,s,vs,fd;
+    lx = bins[0].lower;
     hx = bins[bins.length-1].upper;
     s = Math.min(scale,(hctx.canvas.width-40)/(hx-lx));
+    fd = [];
+    /*
+      fd * n = ht * wd
+      ht = fd * n / wd
+      fd = ht * wd/n
+      1/fd = n/(wd * ht)
+      Take 100/max(n/wd)
+     */
+    for (var i = 0; i < bins.length; i++) {
+	if (data_X.bins[i]) {
+	    fd.push(data_X.bins[i]/(bins[i].upper - bins[i].lower));
+	}
+    }
     if (data_Y.active) {
 	hctx.canvas.height = "250";
-	vs =  Math.min(10/Math.ceil(Math.max.apply(null,data_X.bins)/10),10/Math.ceil(Math.max.apply(null,data_X.bins)/10));
+	for (var i = 0; i < bins.length; i++) {
+	    if (data_Y.bins[i]) {
+		fd.push(data_Y.bins[i]/(bins[i].upper - bins[i].lower));
+	    }
+	}
     } else {
-	hctx.canvas.height = "100";
-	vs = 10/Math.ceil(Math.max.apply(null,data_X.bins)/10);
+	hctx.canvas.height = "130";
     }
-    offset = lx;
+    vs = Math.floor(10/(Math.max.apply(null,fd)/10));
+    offset = lx*s;
     ascale = s;
     clear(hctx);
     hctx.save();
     hctx.translate(0,hctx.canvas.height);
     hctx.translate(10,-20);
-    hctx.translate(-lx*s,0);
+    hctx.translate(-lx*s+10,0);
     drawAxes(hctx,lx,hx,s,bins);//values.classb);
     data_X.draw_histogram(hctx,pos,s,vs,bins);
 
@@ -719,13 +1065,13 @@ function plots() {
     if (data_Y.active) {
 	bctx.canvas.height = "250";
     } else {
-	bctx.canvas.height = "100";
+	bctx.canvas.height = "130";
     }
     clear(bctx);
     bctx.save();
     bctx.translate(0,hctx.canvas.height);
     bctx.translate(10,-20);
-    bctx.translate(-lx*s,0);
+    bctx.translate(-lx*s+10,0);
     drawAxes(bctx,lx,hx,s,bins);//values.classb);
     data_X.draw_boxplot(bctx,s);
     if (data_Y.active) {
@@ -793,12 +1139,8 @@ function scatter() {
     }
     sctx.stroke();
     sctx.beginPath();
-    var sxy = data_X.Sxy(data_Y);
-    var sxx = data_X.Sxx();
-    var g = sxy/sxx;
-    var xm = data_X.mean();
-    var ym = data_Y.mean();
-    var yin = ym - g*xm;
+    var g = gradient;
+    var yin = yintercept;
     sctx.moveTo(lx*s,-(lx*g + yin)*s);
     sctx.lineTo(hx*s,-(hx*g + yin)*s);
     sctx.stroke();

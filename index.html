@@ -7,758 +7,1108 @@
     <link rel="stylesheet" type="text/css" href="style.css">
     <script type="text/javascript" src="data.js"></script>
     <script type="text/javascript" src="script.js"></script>
-    <script type="text/javascript">
-      if(navigator.userAgent.toLowerCase().indexOf('firefox') == -1)
-      {
-      document.write(
-      '<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=MML_HTMLorMML"></sc' +
-      'ript>');
-	}
-    </script>
-  </head>
-  <body>
-    <form id="form"></form>
-    <h1>S1 - Statistics</h1>
-    <p>
-    This page is designed to demonstrate the various calculations required for the S1 Statistics module.
-Students can generate data and see the results of the calculations; also students can try the calculations for themselves and check against the computer's results.
-</p>
-    <h3><a href="#" class="arrow">&#9660;</a>Data Definintion</h3>
-    <div id="data_defn">
-      <div id="data_defn_X" class="dataform">
-	<h4>First Data Sample</h4>
-	<table class="text">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=MML_HTMLorMML" type="text/javascript"></script>
+</head>
+<body>
+  <form id="form"></form>
+  <h1>Statistics</h1>
+  <p id="intro">
+    This page is designed to demonstrate the various calculations required for  A'level Statistics.
+    Students can generate data and see the results of the calculations; also students can try the calculations for themselves and check against the computer's results.
+  </p>
+  <div id="content">
+    <div id="tabsdiv">
+      <ul id="tabs">
+	<li class="tabstyle"><a href="#" class="nolink current"
+				id="datadef"><span class="abbrev">DD</span><span class="full">Data Definintion</span></a>
+	<li class="tabstyle"><a href="#" class="nolink"
+				id="rawdata"><span class="abbrev">RD</span><span class="full">Raw Data<span></a>
+	<li class="tabstyle"><a href="#" class="nolink" id="datarep"><span class="abbrev">GP</span><span class="full">Grouping</span></a>
+	<li class="tabstyle"><a href="#" class="nolink" id="freqtab"><span class="abbrev">FT</span><span class="full">Frequency Table</span></a>
+	<li class="tabstyle"><a href="#" class="nolink" id="stem"><span class="abbrev">SL</span><span class="full">Stem and Leaf</span></a>
+	<li class="tabstyle"><a href="#" class="nolink" id="hist"><span class="abbrev">HG</span><span class="full">Histogram</span></a>
+	<li class="tabstyle"><a href="#" class="nolink" id="box"><span class="abbrev">BP</span><span class="full">Boxplot</span></a>
+	<li class="tabstyle"><a href="#" class="nolink" id="samstat"><span class="abbrev">SS</span><span class="full">Sample Statistics</span></a>
+	<li class="tabstyle correlate"><a href="#" class="nolink" id="correl"><span class="abbrev">CO</span><span class="full">Correlation</span></a>
+	<li class="tabstyle"><a href="#" class="nolink" id="help"><span class="abbrev">?</span><span class="full">Help</span></a>
+      </ul>
+    </div>
+    <div id="main">
+
+      <div id="datadefdiv">
+	<h3>Data Definintion</h3>
+	<div id="data_defn_X" class="dataform">
+	  <h4>First Data Sample</h4>
+	  <table id="autoXtable">
+	    <tr>
+	      <td>
+		<label for="type">
+		  Data type:
+		</label>
+	      </td>
+	      <td>
+		<select name="type" form="form">
+		  <option value="continuous">Continuous</option>
+		  <option value="rounded">Continuous but rounded</option>
+		  <option value="discrete">Discrete</option>
+		</select>
+	      </td>
+	    </tr>
+	    <tr id="autoXrow">
+	      <td>
+		<label for="auto_X">
+		  Auto:
+		</label>
+	      </td>
+	      <td>
+		<input type="checkbox" name="auto_X" id="auto_X"
+		       value="" form="form">
+	      </td>
+	    </tr>
+	  </table>
+	  <table class="text dataTable">
+	    <tbody id="self_data_X">
+	      <tr>
+		<td>
+		  <label for="adata_X">
+		    Data:
+		  </label>
+		</td>
+		<td>
+		  <textarea name="adata_X" id="adata_X" value=""
+			    form="form" class="dataInput"></textarea>
+		</td>
+	      </tr>
+	    </tbody>
+	    <tbody id="auto_data_X">
+	      <tr>
+		<td>
+		  <label for="distribution_X">
+		    Distribution:
+		  </label>
+		</td>
+		<td>
+		  <select name="distribution_X" form="form">
+		    <optgroup id="ctsdist_X" label="Continuous Distributions">
+		      <option id="defcts_X" value="gaussian">Gaussian (Normal)</option>
+		      <option value="exponential">(Translated) Exponential</option>
+		      <option value="uniform">Uniform</option>
+		      <option value="lognormal">Log-Normal</option>
+		    </optgroup>
+		    <optgroup id="discretedist_X" label="Discrete Distributions">
+		      <option id="defdisc_X" value="binomial">Binomial</option>
+		      <option value="poisson">Poisson</option>
+		      <option value="uniformd">Uniform</option>
+		    </optgroup>
+		  </select>
+		</td>
+	      </tr>
+	      <tr>
+		<td>
+		  <label for="number_X">
+		    Number of points:
+		  </label>
+		</td>
+		<td>
+		  <input type="text" name="number_X" id="number_X" value="20" form="form">
+		</td>
+	      </tr>
+	      <tr>
+		<td>
+		  <label for="mean_X">
+		    <span id="cts_mean_X">
+		      Distribution mean:
+		    </span>
+		    <span id="binomial_mean_X">
+		      Number of trials:
+		    </span>
+		    <span id="uniformd_mean_X">
+		      Maximum:
+		    </span>
+		  </label>
+		</td>
+		<td>
+		  <input type="text" name="mean_X" id="mean_X" value="20" form="form">
+		</td>
+	      </tr>
+	      <tr>
+		<td>
+		  <label for="stddev_X">
+		    <span id="cts_stddev_X">
+		      Standard deviation:
+		    </span>
+		    <span id="binomial_stddev_X">
+		      Probability of success:
+		    </span>
+		  </label>
+		</td>
+		<td>
+		  <input type="text" name="stddev_X" id="stddev_X" value="5" form="form">
+		</td>
+	      </tr>
+	      <tr>
+		<td>
+		  <label for="edata_X">
+		    Extra data points:
+		  </label>
+		</td>
+		<td>
+		  <input type="text" name="edata_X" id="edata_X" value="" form="form">
+		</td>
+	      </tr>
+	    </tbody>
+	      <tr>
+		<td>
+		</td>
+		<td>
+		  <button type="button" name="reset" id="reset" form="form">Generate
+		    data</button>
+		</td>
+	      </tr>
+
+	  </table>
+	</div>
+	<div id="data_defn_Y" class="dataform">
+	  <h4>Second Data Sample</h4>
+	  <table>
+	    <tr id="enableYrow">
+	      <td>
+		<label for="active_Y">
+		  Enable:
+		</label>
+	      </td>
+	      <td>
+		<input type="checkbox" name="enable_Y" id="enable_Y" value="" form="form">
+	      </td>
+	    </tr>
+	    <tr class="second">
+	      <td>
+		<label for="auto_Y">
+		  Auto:
+		</label>
+	      </td>
+	      <td>
+		<input type="checkbox" name="auto_Y" id="auto_Y"
+		       value="" form="form">
+	      </td>
+	    </tr>
+	  </table>
+	  <table class="text second dataTable">
+	    <tbody id="self_data_Y">
+	      <tr>
+		<td>
+		  <label for="adata_Y">
+		    Data:
+		  </label>
+		</td>
+		<td>
+		  <textarea name="adata_Y" id="adata_Y" value=""
+			    form="form" class="dataInput"></textarea>
+		</td>
+	      </tr>
+	    </tbody>
+	    <tbody id="auto_data_Y">
+	      <tr>
+		<td>
+		  <label for="distribution_Y">
+		    Distribution:
+		  </label>
+		</td>
+		<td>
+		  <select name="distribution_Y" form="form">
+		    <optgroup id="ctsdist_Y" label="Continuous Distributions">
+		      <option id="defcts_Y" value="gaussian">Gaussian (Normal)</option>
+		      <option value="exponential">(Translated) Exponential</option>
+		      <option value="uniform">Uniform</option>
+		      <option value="lognormal">Log-Normal</option>
+		    </optgroup>
+		    <optgroup id="discretedist_Y" label="Discrete Distributions">
+		      <option id="defdisc_Y" value="binomial">Binomial</option>
+		      <option value="poisson">Poisson</option>
+		      <option value="uniformd">Uniform</option>
+		    </optgroup>
+		  </select>
+		</td>
+	      </tr>
+	      <tr>
+		<td>
+		  <label for="number_Y">
+		    Number of points:
+		  </label>
+		</td>
+		<td>
+		  <input type="text" name="number_Y" id="number_Y" value="20" form="form">
+		</td>
+	      </tr>
+	      <tr>
+		<td>
+		  <label for="mean_Y">
+		    <span id="cts_mean_Y">
+		      Distribution mean:
+		    </span>
+		    <span id="binomial_mean_Y">
+		      Number of trials:
+		    </span>
+		    <span id="uniformd_mean_Y">
+		      Maximum:
+		    </span>
+		  </label>
+		</td>
+		<td>
+		  <input type="text" name="mean_Y" id="mean_Y" value="20" form="form">
+		</td>
+	      </tr>
+	      <tr>
+		<td>
+		  <label for="stddev_Y">
+		    <span id="cts_stddev_Y">
+		      Standard deviation:
+		    </span>
+		    <span id="binomial_stddev_Y">
+		      Probability of success:
+		    </span>
+		  </label>
+		</td>
+		<td>
+		  <input type="text" name="stddev_Y" id="stddev_Y" value="5" form="form">
+		</td>
+	      </tr>
+	      <tr>
+		<td>
+		  <label for="edata_Y">
+		    Extra data points:
+		  </label>
+		</td>
+		<td>
+		  <input type="text" name="edata_Y" id="edata_Y" value="" form="form">
+		</td>
+	      </tr>
+	      <tr>
+		<td>
+		  <label for="quantiles">
+		    Generate quantiles:
+		  </label>
+		</td>
+		<td>
+		  <input type="checkbox" name="quantiles" id="quantiles" value="" form="form">
+		</td>
+	      </tr>
+	      <tr>
+		<td>
+		  <label for="correlate">
+		    Force correlation:
+		  </label>
+		</td>
+		<td>
+		  <input type="checkbox" name="correlate" id="correlate" value="" form="form">
+		</td>
+	      </tr>
+	      <tr>
+		<td>
+		  <label for="correlation">
+		    Desired correlation:
+		  </label>
+		</td>
+		<td>
+		  <input type="text" name="correlation" id="correlation" checked="" form="form">
+		</td>
+	      </tr>
+	      <tr>
+		<td>
+		  <label for="coding">
+		    Apply coding:
+		  </label>
+		</td>
+		<td>
+		  <input type="checkbox" name="coding" id="coding" value="" form="form">
+		  <math xmlns='http://www.w3.org/1998/Math/MathML'
+			display='inline'><mi>Y</mi><mo>=</mo>
+		  </math>
+		  <input type="text" name="coding_a" id="coding_a"
+			 value="1" form="form" class="coding">
+		  <math xmlns='http://www.w3.org/1998/Math/MathML'
+			display='inline'>
+		    <mi>X</mi><mo>+</mo></math>
+		  <input type="text" name="coding_b" id="coding_b"
+			 value="0" form="form" class="coding">
+		</td>
+	      </tr>
+	  </table>
+	</div>
+      </div>
+      <div id="rawdatadiv">
+	<h3>Raw Data</h3>
+	<table class="data_table">
 	  <tr>
-	    <td>
-	      <label for="type">
-		Data type:
-	      </label>
+	    <td class="first">
+	      First Sample:
 	    </td>
-	    <td>
-	      <select name="type" form="form">
-		<option value="continuous">Continuous</option>
-		<option value="discrete">Discrete</option>
-		<option value="rounded">Continuous but rounded</option>
-	      </select>
+	    <td id="data_X" class="data">
 	    </td>
 	  </tr>
-	  <tr>
+	  <tr class="second">
 	    <td>
-	      <label for="distribution_X">
-		Distribution:
-	      </label>
+	      Second Sample:
 	    </td>
-	    <td>
-	      <select name="distribution_X" form="form">
-		<option value="gaussian">Gaussian (Normal)</option>
-		<option value="exponential">(Translated) Exponential</option>
-		<option value="uniform">Uniform</option>
-		<option value="lognormal">Log-Normal</option>
-	      </select>
+	    <td id="data_Y" class="data">
 	    </td>
 	  </tr>
-	  <tr>
+	  <tr class="correlate">
 	    <td>
-	      <label for="number_X">
-		Number of points:
-	      </label>
+	      Paired Data:
 	    </td>
-	    <td>
-	      <input type="text" name="number_X" id="number_X" value="20" form="form">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <label for="mean_X">
-		Distribution mean:
-	      </label>
-	    </td>
-	    <td>
-	      <input type="text" name="mean_X" id="mean_X" value="20" form="form">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <label for="stddev_X">
-		Standard deviation:
-	      </label>
-	    </td>
-	    <td>
-	      <input type="text" name="stddev_X" id="stddev_X" value="5" form="form">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <label for="edata_X">
-		Extra data points:
-	      </label>
-	    </td>
-	    <td>
-	      <input type="text" name="edata_X" id="edata_X" value="" form="form">
+	    <td id="data_XY" class="data">
 	    </td>
 	  </tr>
 	</table>
-	<button name="reset" id="reset" form="form">Regenerate data</button>
-      </div>
-      <div id="data_defn_Y" class="dataform">
-	<h4>Second Data Sample</h4>
-	<table class="text">
+	<h3>Sorted Raw Data</h3>
+	<table class="data_table">
 	  <tr>
-	    <td>
-	      <label for="active_Y">
-		Enable:
-	      </label>
+	    <td class="first">
+	      First Sample:
 	    </td>
-	    <td>
-	      <input type="checkbox" name="enable_Y" id="enable_Y" value="" form="form">
+	    <td id="sdata_X" class="data">
 	    </td>
 	  </tr>
-	  <tr>
+	  <tr class="second">
 	    <td>
-	      <label for="distribution_Y">
-		Distribution:
-	      </label>
+	      Second Sample:
 	    </td>
-	    <td>
-	      <select name="distribution_Y" form="form">
-		<option value="gaussian">Gaussian (Normal)</option>
-		<option value="exponential">(Translated) Exponential</option>
-		<option value="uniform">Uniform</option>
-		<option value="lognormal">Log-Normal</option>
-	      </select>
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <label for="number_Y">
-		Number of points:
-	      </label>
-	    </td>
-	    <td>
-	      <input type="text" name="number_Y" id="number_Y" value="20" form="form">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <label for="mean_Y">
-		Distribution mean:
-	      </label>
-	    </td>
-	    <td>
-	      <input type="text" name="mean_Y" id="mean_Y" value="20" form="form">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <label for="stddev_Y">
-		Standard deviation:
-	      </label>
-	    </td>
-	    <td>
-	      <input type="text" name="stddev_Y" id="stddev_Y" value="5" form="form">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <label for="edata_Y">
-		Extra data points:
-	      </label>
-	    </td>
-	    <td>
-	      <input type="text" name="edata_Y" id="edata_Y" value="" form="form">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <label for="correlate">
-		Correlate:
-	      </label>
-	    </td>
-	    <td>
-	      <input type="checkbox" name="correlate" id="correlate" value="" form="form">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <label for="correlation">
-		Desired Correlation:
-	      </label>
-	    </td>
-	    <td>
-	      <input type="text" name="correlation" id="correlation" checked="" form="form">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <label for="coding">
-		Apply Coding:
-	      </label>
-	    </td>
-	    <td>
-	      <input type="checkbox" name="coding" id="coding" value="" form="form">
-	      <math xmlns='http://www.w3.org/1998/Math/MathML'
-		    display='inline'><mi>Y</mi><mo>=</mo><mi>a</mi><mi>X</mi><mo>+</mo><mi>b</mi></math>
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <label for="coding_a">
-		<math xmlns='http://www.w3.org/1998/Math/MathML' display='inline'><mi>a</mi><mo>=</mo></math>
-	      </label>
-	    </td>
-	    <td>
-	      <input type="text" name="coding_a" id="coding_a" value="1" form="form">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <label for="coding_b">
-		<math xmlns='http://www.w3.org/1998/Math/MathML' display='inline'><mi>b</mi><mo>=</mo></math>
-	      </label>
-	    </td>
-	    <td>
-	      <input type="text" name="coding_b" id="coding_b" value="0" form="form">
+	    <td id="sdata_Y" class="data">
 	    </td>
 	  </tr>
 	</table>
       </div>
-      <div style="clear: both;"></div>
-    </div>
-    <h3><a href="#" class="arrow">&#9660;</a>Raw Data</h3>
-    <table class="data_table">
-      <tr>
-	<td class="first">
-	  First Sample:
-	</td>
-	<td id="data_X" class="data">
-	</td>
-      </tr>
-      <tr class="second">
-	<td>
-	  Second Sample:
-	</td>
-	<td id="data_Y" class="data">
-	</td>
-      </tr>
-    </table>
-    <h3><a href="#" class="arrow">&#9660;</a>Sorted Raw Data</h3>
-    <table class="data_table">
-      <tr>
-	<td class="first">
-	  First Sample:
-	</td>
-	<td id="sdata_X" class="data">
-	</td>
-      </tr>
-      <tr class="second">
-	<td>
-	  Second Sample:
-	</td>
-	<td id="sdata_Y" class="data">
-	</td>
-      </tr>
-    </table>
-    <h3><a href="#" class="arrow">&#9660;</a>Data Representation</h3>
-    <div id="form_rep">
-      <table class="text">
-	<tr>
-	  <td>
-	    <label for="even">
-	      Even class intervals:
-	    </label>
-	  </td>
-	  <td>
-	    <input type="checkbox" name="even" id="even" checked="1"
-		   value="" form="form">
-	  </td>
-	</tr>
-	<tr>
-	  <td>
-	    <label for="classb">
-	      Class offset:
-	    </label>
-	  </td>
-	  <td>
-	    <input type="text" name="classb" id="classb" value="0" form="form">
-	  </td>
-	</tr>
-	<tr>
-	  <td>
-	    <label for="classw">
-	      Class interval width:
-	    </label>
-	  </td>
-	  <td>
-	    <input type="text" name="classw" id="classw" value="10" form="form">
-	  </td>
-	</tr>
-	<tr>
-	  <td>
-	    <label for="classes">
-	      Class endpoints:
-	    </label>
-	  </td>
-	  <td>
-	    <input type="text" name="classes" id="classes" value="" form="form">
-	  </td>
-	</tr>
-	<tr>
-	  <td>
-	    <label for="radius">
-	      Point radius:
-	    </label>
-	  </td>
-	  <td>
-	    <input type="text" name="radius" id="radius" value="2" form="form">
-	  </td>
-	</tr>
-      </table>
-    </div>
-    <h3><a href="#" class="arrow">&#9660;</a>Frequency Table</h3>
-    <div id="freq_table">
-      <table id="freq">
-	<thead>
+      <div id="datarepdiv">
+	<h3>Data Representation</h3>
+	<table class="text">
 	  <tr>
-	    <th colspan='2'>
-	      Class Interval
-	    </th>
-	    <th colspan='2'>
-	      Frequency
-	    </th>
+	    <td>
+	      <label for="even">
+		Even class intervals:
+	      </label>
+	    </td>
+	    <td>
+	      <input type="checkbox" name="even" id="even" checked="1"
+		     value="" form="form">
+	    </td>
 	  </tr>
 	  <tr>
-	    <th colspan='2'>
-	    </th>
-	    <th class='first'>
-	      First
-	    </th>
-	    <th class='second'>
-	      Second
-	    </th>
+	    <td>
+	      <label for="classb">
+		Class offset:
+	      </label>
+	    </td>
+	    <td>
+	      <input type="text" name="classb" id="classb" value="0" form="form">
+	    </td>
 	  </tr>
-	</thead>
-	<tbody id="freqrows">
-	</tbody>
-      </table>
-    </div>
-    <h3><a href="#" class="arrow">&#9660;</a>Stem and Leaf
-      Diagram</h3>
-    <div id="stem_leaf">
-      <p>
-	(Data rounded to nearest whole number.)
-      </p>
-      <table id="stem">
-	<thead>
 	  <tr>
-	    <th class="second" id="leftleaf">
-	      First Leaf
-	    </th>
-	    <th>
-	      Stem
-	    </th>
-	    <th id="rightleaf">
-	      <span id="leaflabel" class="second">Second</span> Leaf
-	    </th>
+	    <td>
+	      <label for="classw">
+		Class interval width:
+	      </label>
+	    </td>
+	    <td>
+	      <input type="text" name="classw" id="classw" value="10" form="form">
+	    </td>
 	  </tr>
-	  <tbody id="stemrows">
+	  <tr>
+	    <td>
+	      <label for="classes">
+		Class endpoints:
+	      </label>
+	    </td>
+	    <td>
+	      <input type="text" name="classes" id="classes" value="" form="form">
+	    </td>
+	  </tr>
+	      <tr>
+		<td>
+		</td>
+		<td>
+		  <button type="button" name="regroup" id="regroup"
+		  form="form">Regroup data</button>
+		</td>
+	      </tr>
+	</table>
+      </div>
+      <div id="freqtabdiv">
+	<h3>Frequency Table</h3>
+	<table id="freq">
+	  <thead>
+	    <tr>
+	      <th colspan='2'>
+		Class Interval
+	      </th>
+	      <th colspan='2'>
+		Frequency
+	      </th>
+	    </tr>
+	    <tr>
+	      <th colspan='2'>
+	      </th>
+	      <th class='first'>
+		First
+	      </th>
+	      <th class='second'>
+		Second
+	      </th>
+	    </tr>
+	  </thead>
+	  <tbody id="freqrows">
 	  </tbody>
-      </table>
-    </div>
-    <h3><a href="#" class="arrow">&#9660;</a>Histogram</h3>
-    <div id="hist">
-      <canvas id="histogram" height="100"></canvas>
-      <table id="readings" class="text">
-	<tr>
-	  <td>
-	    Mark:
-	  </td>
-	  <td>
-	    <span id="mark"></span>
-	  </td>
-	</tr>
-	<tr>
-	  <td class="first">
-	    Points from first sample below mark:
-	  </td>
-	  <td>
-	    <span id="below_X" class="first"></span>
-	  </td>
-	</tr>
-	<tr>
-	  <td class="first">
-	    Approximate points from first sample below mark:
-	  </td>
-	  <td>
-	    <span id="abelow_X" class="first"></span>
-	  </td>
-	</tr>
-	<tr>
-	  <td class="second">
-	    Points from second sample below mark:
-	  </td>
-	  <td>
-	    <span id="below_Y" class="second"></span>
-	  </td>
-	</tr>
-	<tr>
-	  <td class="second">
-	    Approximate points from second sample below mark:
-	  </td>
-	  <td>
-	    <span id="abelow_Y" class="second"></span>
-	  </td>
-	</tr>
-      </table>
-    </div>
-    <h3><a href="#" class="arrow">&#9660;</a>Boxplot</h3>
-    <div id="box">
-      <canvas id="boxplot" height="100"></canvas>
-    </div>
-    <h3><a href="#" class="arrow">&#9660;</a>Sample Statistics</h3>
-    <div id="sample">
-      <table id="stats" class="text">
-	<tr>
-	  <th></th>
-	  <th class="first">First Sample</th>
-	  <th class="second">Second Sample</th>
-	</tr>
-	<tbody>
+	</table>
+      </div>
+      <div id="stemdiv">
+	<h3>Stem and Leaf
+	  Diagram</h3>
+	<p>
+	  (Data rounded to nearest whole number.)
+	</p>
+	<table id="stem">
+	  <thead>
+	    <tr>
+	      <th class="second" id="leftleaf">
+		First Leaf
+	      </th>
+	      <th>
+		Stem
+	      </th>
+	      <th id="rightleaf">
+		<span id="leaflabel" class="second">Second</span> Leaf
+	      </th>
+	    </tr>
+	    <tbody id="stemrows">
+	    </tbody>
+	</table>
+      </div>
+      <div id="histdiv">
+	<h3>Histogram</h3>
+	<canvas id="histogram" height="100"></canvas>
+	<table id="readings" class="text">
 	  <tr>
 	    <td>
-	      <span class='stooltip'>Mean:</span>
-	      <span class='tooltip'>
-		The <span class='defn'>mean</span> of a data set is
-		the sum of the values divided by the number of values.
-<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mover><mi>x</mi><mo>&#x000AF;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><msubsup><mo lspace="thinmathspace" rspace="thinmathspace">&Sum;</mo> <mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow> <mi>n</mi></msubsup><msub><mi>x</mi> <mi>i</mi></msub></math>	      </span>
+	      Mark:
 	    </td>
-	    <td id="smean_X" class="first">
-	    </td>
-	    <td id="smean_Y" class="second">
+	    <td>
+	      <span id="mark"></span>
 	    </td>
 	  </tr>
 	  <tr>
+	    <td class="first">
+	      Points from first sample below mark:
+	    </td>
 	    <td>
-	      <span class='stooltip'>Median:</span>
-	      <span class='tooltip'>
-		The <span class='defn'>median</span> of a data set is
-		the middle value when they are listed in order.
-		If there are an even number, it is the average of the
-		two middle values.
-	      </span>
-	    </td>
-	    <td id="smedian_X" class="first">
-	    </td>
-	    <td id="smedian_Y" class="second">
+	      <span id="below_X" class="first"></span>
 	    </td>
 	  </tr>
 	  <tr>
+	    <td class="first">
+	      Approximate points from first sample below mark:
+	    </td>
 	    <td>
-	      <span class="cts"><span class='stooltip'>Modal class:</span><span class='tooltip'>
-		  To define the <span class='defn'>modal class</span> of a data
-		  set, the data needs to be divided into classes as in
-		  a frequency table.
-		  Then the <span class='defn'>modal class</span> is
-		  the class or classes containing the most elements of
-		  the data set.
+	      <span id="abelow_X" class="first"></span>
+	    </td>
+	  </tr>
+	  <tr>
+	    <td class="second">
+	      Points from second sample below mark:
+	    </td>
+	    <td>
+	      <span id="below_Y" class="second"></span>
+	    </td>
+	  </tr>
+	  <tr>
+	    <td class="second">
+	      Approximate points from second sample below mark:
+	    </td>
+	    <td>
+	      <span id="abelow_Y" class="second"></span>
+	    </td>
+	  </tr>
+	</table>
+      </div>
+      <div id="boxdiv">
+	<h3>Boxplot</h3>
+	<canvas id="boxplot" height="100"></canvas>
+      </div>
+      <div id="samstatdiv">
+	<h3>Sample Statistics</h3>
+	<table id="stats" class="text">
+	  <tr>
+	    <th></th>
+	    <th class="first">First Sample</th>
+	    <th class="second">Second Sample</th>
+	  </tr>
+	  <tbody>
+	    <tr>
+	      <td>
+		<span class='stooltip'>Size:</span>
+		<span class='tooltip'>
+		  The <span class='defn'>size</span> of a data set is
+		  the number of values.
+		  This is usually denotes by
+		  <math xmlns='http://www.w3.org/1998/Math/MathML' display='inline'><mi>n</mi></math>	      </span>
+	      </td>
+	      <td id="size_X" class="first">
+	      </td>
+	      <td id="size_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<span class='stooltip'>Mean:</span>
+		<span class='tooltip'>
+		  The <span class='defn'>mean</span> of a data set is
+		  the sum of the values divided by the number of values.
+		  <math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mover><mi>x</mi><mo>&#x000AF;</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><msubsup><mo lspace="thinmathspace" rspace="thinmathspace">&Sum;</mo> <mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow> <mi>n</mi></msubsup><msub><mi>x</mi> <mi>i</mi></msub></math>	      </span>
+	      </td>
+	      <td id="smean_X" class="first">
+	      </td>
+	      <td id="smean_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<span class='stooltip'>Median:</span>
+		<span class='tooltip'>
+		  The <span class='defn'>median</span> of a data set is
+		  the middle value when they are listed in order.
+		  If there are an even number, it is the average of the
+		  two middle values.
 		</span>
-		</span><span class="discrete"><span class='tooltip'>Mode:</span><span class='tooltip'>
-		  The <span class='defn'>mode</span> of a data
-		  set is the value or values that occur most
-		  frequently in the data.
+	      </td>
+	      <td id="smedian_X" class="first">
+	      </td>
+	      <td id="smedian_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<span class="cts"><span class='stooltip'>Modal class:</span><span class='tooltip'>
+		    To define the <span class='defn'>modal class</span> of a data
+		    set, the data needs to be divided into classes as in
+		    a frequency table.
+		    Then the <span class='defn'>modal class</span> is
+		    the class or classes containing the most elements of
+		    the data set.
+		  </span>
+		</span><span class="discrete"><span class='stooltip'>Mode:</span><span class='tooltip'>
+		    The <span class='defn'>mode</span> of a data
+		    set is the value or values that occur most
+		    frequently in the data.
 		</span></span>
-	    </td>
-	    <td id="smode_X" class="first">
-	    </td>
-	    <td id="smode_Y" class="second">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <span class='stooltip'>Variance:</span>
-	      <span class='tooltip'>
-		The <span class='defn'>variance</span> of a data set
-		is a measure of its spread.  It is defined as:
-		<math xmlns='http://www.w3.org/1998/Math/MathML'
-		display='block'><msup><mi>&sigma;</mi> <mn>2</mn></msup><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><msubsup><mo lspace="thinmathspace"
-																  rspace="thinmathspace">&Sum;</mo> <mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow> <mi>n</mi></msubsup><mo stretchy="false">(</mo><msub><mi>x</mi> <mi>i</mi></msub><mo>&minus;</mo><mover><mi>x</mi><mo>&#x000AF;</mo></mover><msup><mo stretchy="false">)</mo> <mn>2</mn></msup></math>
-		(where <math xmlns='http://www.w3.org/1998/Math/MathML' display='inline'><mover><mi>x</mi><mo>&#x000AF;</mo></mover></math> is the mean) but is more conveniently calculated using the formula:
-		<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msup><mi>&sigma;</mi> <mn>2</mn></msup><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo lspace="thinmathspace" rspace="thinmathspace">&Sum;</mo> <mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow> <mi>n</mi></munderover><msubsup><mi>x</mi> <mi>i</mi> <mn>2</mn></msubsup><mo>&minus;</mo><msup><mover><mi>x</mi><mo>&#x000AF;</mo></mover> <mn>2</mn></msup></math>
-	      </span>
-	    </td>
-	    <td id="svariance_X" class="first">
-	    </td>
-	    <td id="svariance_Y" class="second">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <span class='stooltip'>Standard Deviation:</span>
-	      <span class='tooltip'>
-		The <span class='defn'>standard deviation</span> of a
-		data set is a measure of its spread.
-		It is defined as the square root of the variance.
-	      </span>
-	    </td>
-	    <td id="sstddev_X" class="first">
-	    </td>
-	    <td id="sstddev_Y" class="second">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <span class='stooltip'>Lower Quartile:</span>
-	      <span class='tooltip'>
-		The <span class='defn'>lower quartile</span> of a data
-		set is the value such that a quarter of the points lie
-		below that value and three-quarters lie above.  Its
-		definition is slightly different depending on whether
-		or not there is an actual data point satisfying that
-		property.
-	      </span>
-	    </td>
-	    <td id="slowq_X" class="first">
-	    </td>
-	    <td id="slowq_Y" class="second">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <span class='stooltip'>Upper Quartile:</span>
-	      <span class='tooltip'>
-		The <span class='defn'>upper quartile</span> of a data
-		set is the value such that three-quarters of the points lie
-		below that value and a quarter lie above.  Its
-		definition is slightly different depending on whether
-		or not there is an actual data point satisfying that
-		property.
-	      </span>
-	    </td>
-	    <td id="supq_X" class="first">
-	    </td>
-	    <td id="supq_Y" class="second">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <span class='stooltip'>Inter-Quartile Range:</span>
-	      <span class='tooltip'>
-		The <span class='defn'>inter-quartile range</span> of
-		a data set is a measure of its spread.  It is defined
-		as the upper quartile minus the lower quartile.
-	      </span>
-	    </td>
-	    <td id="siqrange_X" class="first">
-	    </td>
-	    <td id="siqrange_Y" class="second">
-	    </td>
-	  </tr>
-	  <tr class='rowSpacer'>
-	    <td>
-	      Skewness
-<math xmlns='http://www.w3.org/1998/Math/MathML' display='inline'><mfrac><mrow><mn>3</mn><mo stretchy="false">(</mo><mover><mi>x</mi><mo>&#x000AF;</mo></mover><mo>&minus;</mo><mo lspace="0em" rspace="thinmathspace">median</mo><mo stretchy="false">)</mo></mrow><mi>&sigma;</mi></mfrac></math>:
-	    </td>
-	    <td id="smedskew_X" class="first">
-	    </td>
-	    <td id="smedskew_Y" class="second">
-	    </td>
-	  </tr>
-	  <tr class='discrete'>
-	    <td>
-	      Skewness
-	  <math xmlns='http://www.w3.org/1998/Math/MathML' display='inline'><mfrac><mrow><mover><mi>x</mi><mo>&#x000AF;</mo></mover><mo>&minus;</mo><mo lspace="0em" rspace="thinmathspace">mode</mo></mrow><mi>&sigma;</mi></mfrac></math>:
-	    </td>
-	    <td id="smodeskew_X" class="first">
-	    </td>
-	    <td id="smodeskew_Y" class="second">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      Quartile skewness coefficient:
-	    </td>
-	    <td id="sskewq_X" class="first">
-	    </td>
-	    <td id="sskewq_Y" class="second">
-	    </td>
-	  </tr>
-	  <tr class='rowSpacer'>
-	    <td>
-	      Estimate of Mean:
-	    </td>
-	    <td id="sbmean_X" class="first">
-	    </td>
-	    <td id="sbmean_Y" class="second">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      Estimate of Variance:
-	    </td>
-	    <td id="sbvariance_X" class="first">
-	    </td>
-	    <td id="sbvariance_Y" class="second">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      Estimate of Standard Deviation:
-	    </td>
-	    <td id="sbstddev_X" class="first">
-	    </td>
-	    <td id="sbstddev_Y" class="second">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      Estimate of Median:
-	    </td>
-	    <td id="sbmedian_X" class="first">
-	    </td>
-	    <td id="sbmedian_Y" class="second">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      Estimate of Lower Quartile:
-	    </td>
-	    <td id="sblowq_X" class="first">
-	    </td>
-	    <td id="sblowq_Y" class="second">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      Estimate of Upper Quartile:
-	    </td>
-	    <td id="sbupq_X" class="first">
-	    </td>
-	    <td id="sbupq_Y" class="second">
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      Estimate of Inter-Quartile Range:
-	    </td>
-	    <td id="sbiqrange_X" class="first">
-	    </td>
-	    <td id="sbiqrange_Y" class="second">
-	    </td>
-	  </tr>
-	</tbody>
-	<tbody id='quantiles'>
-	  <tr class='rowSpacer'>
-	    <td>
-	      Additional quantile calculations:
-	    </td>
-	  </tr>
-	  <tr id='quantile_1'>
-	    <td class='quantiles'>
-	      <button name='add_1' id='add_1' form='form' class='plus'>+</button><input type='text' id='kth_1' form='form'
-											class='quantile'>th quantile of&nbsp;<input type='text' id='nth_1' form='form' class='quantile'>
-	    </td>
-	    <td id='quantile_1_X'>
-	    </td>
-	    <td id='quantile_1_Y' class='second'>
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      Estimate:
-	    </td>
-	    <td id='equantile_1_X'>
-	    </td>
-	    <td id='equantile_1_Y' class='second'>
-	    </td>
-	  </tr>
-	</tbody>
-      </table>
-    </div>
-    <div id='correlationStatistics'>
-    <h3 class='second'><a href="#" class="arrow">&#9660;</a>Correlation</h3>
-    <div class='second'>
-      <canvas id='scatter'></canvas>
-      <div id='corrmathml'>
-      <math xmlns='http://www.w3.org/1998/Math/MathML'
-	    display='inline'>
-	<mrow>
-	  <mtable columnalign="right left right left
-						 right left right left
-						 right left"
-						     columnspacing="0em">
-	    <mtr>
-	      <mtd>
-		<msub>
-		  <mi>S</mi>
-		  <mrow>
-		    <mi>x</mi>
-		    <mi>x</mi>
-		  </mrow>
-		</msub>
-	      </mtd>
-	      <mtd>
-		<mo>=</mo>
-		<mn id='Sxx'>3</mn>
-	      </mtd>
-	    </mtr>
-	    <mtr>
-	      <mtd>
-		<msub>
-		  <mi>S</mi>
-		  <mrow>
-		    <mi>y</mi>
-		    <mi>y</mi>
-		  </mrow>
-		</msub>
-	      </mtd>
-	      <mtd>
-		<mo>=</mo>
-		<mn id='Syy'>4</mn>
-	      </mtd>
-	    </mtr>
-	    <mtr>
-	      <mtd>
-		<msub>
-		  <mi>S</mi>
-		  <mrow>
-		    <mi>x</mi>
-		    <mi>y</mi>
-		  </mrow>
-		</msub>
-	      </mtd>
-	      <mtd>
-		<mo>=</mo>
-		<mn id='Sxy'>5</mn>
-	      </mtd>
-	    </mtr>
-	    <mtr>
-	      <mtd>
-		<mi>r</mi><mo>=</mo><mfrac><mrow><msub><mi>S</mi> <mrow><mi>x</mi><mi>y</mi></mrow></msub></mrow><msqrt><mrow><msub><mi>S</mi> <mrow><mi>x</mi><mi>x</mi></mrow></msub><msub><mi>S</mi> <mrow><mi>y</mi><mi>y</mi></mrow></msub></mrow></msqrt></mfrac>
-	      </mtd>
-	      <mtd>
-		<mo>=</mo>
-		<mn id='pmcc'>6</mn>
-	      </mtd>
-	    </mtr>
-	    <mtr>
-	      <mtd>
-		<mi>Y</mi>
-	      </mtd>
-	      <mtd>
-		<mo>=</mo>
-		<mn id='gradient'>7</mn>
-		<mi>X</mi>
-		<mo>+</mo>
-		<mn id='intercept'>8</mn>
-	      </mtd>
-	    </mtr>
-	  </mtable>
-	</mrow>
-      </math>
+	      </td>
+	      <td id="smode_X" class="first">
+	      </td>
+	      <td id="smode_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<span class='stooltip'>Variance:</span>
+		<span class='tooltip'>
+		  The <span class='defn'>variance</span> of a data set
+		  is a measure of its spread.  It is defined as:
+		  <math xmlns='http://www.w3.org/1998/Math/MathML'
+			display='block'><msup><mi>&sigma;</mi> <mn>2</mn></msup><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><msubsup><mo lspace="thinmathspace"
+																	  rspace="thinmathspace">&Sum;</mo> <mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow> <mi>n</mi></msubsup><mo stretchy="false">(</mo><msub><mi>x</mi> <mi>i</mi></msub><mo>&minus;</mo><mover><mi>x</mi><mo>&#x000AF;</mo></mover><msup><mo stretchy="false">)</mo> <mn>2</mn></msup></math>
+		  (where <math xmlns='http://www.w3.org/1998/Math/MathML' display='inline'><mover><mi>x</mi><mo>&#x000AF;</mo></mover></math> is the mean) but is more conveniently calculated using the formula:
+		  <math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msup><mi>&sigma;</mi> <mn>2</mn></msup><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo lspace="thinmathspace" rspace="thinmathspace">&Sum;</mo> <mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow> <mi>n</mi></munderover><msubsup><mi>x</mi> <mi>i</mi> <mn>2</mn></msubsup><mo>&minus;</mo><msup><mover><mi>x</mi><mo>&#x000AF;</mo></mover> <mn>2</mn></msup></math>
+		</span>
+	      </td>
+	      <td id="svariance_X" class="first">
+	      </td>
+	      <td id="svariance_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<span class='stooltip'>Standard Deviation:</span>
+		<span class='tooltip'>
+		  The <span class='defn'>standard deviation</span> of a
+		  data set is a measure of its spread.
+		  It is defined as the square root of the variance.
+		</span>
+	      </td>
+	      <td id="sstddev_X" class="first">
+	      </td>
+	      <td id="sstddev_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<span class='stooltip'>Lower Quartile:</span>
+		<span class='tooltip'>
+		  The <span class='defn'>lower quartile</span> of a data
+		  set is the value such that a quarter of the points lie
+		  below that value and three-quarters lie above.  Its
+		  definition is slightly different depending on whether
+		  or not there is an actual data point satisfying that
+		  property.
+		</span>
+	      </td>
+	      <td id="slowq_X" class="first">
+	      </td>
+	      <td id="slowq_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<span class='stooltip'>Upper Quartile:</span>
+		<span class='tooltip'>
+		  The <span class='defn'>upper quartile</span> of a data
+		  set is the value such that three-quarters of the points lie
+		  below that value and a quarter lie above.  Its
+		  definition is slightly different depending on whether
+		  or not there is an actual data point satisfying that
+		  property.
+		</span>
+	      </td>
+	      <td id="supq_X" class="first">
+	      </td>
+	      <td id="supq_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<span class='stooltip'>Inter-Quartile Range:</span>
+		<span class='tooltip'>
+		  The <span class='defn'>inter-quartile range</span> of
+		  a data set is a measure of its spread.  It is defined
+		  as the upper quartile minus the lower quartile.
+		</span>
+	      </td>
+	      <td id="siqrange_X" class="first">
+	      </td>
+	      <td id="siqrange_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr class='rowSpacer'>
+	      <td>
+		Skewness
+		<math xmlns='http://www.w3.org/1998/Math/MathML' display='inline'><mfrac><mrow><mn>3</mn><mo stretchy="false">(</mo><mover><mi>x</mi><mo>&#x000AF;</mo></mover><mo>&minus;</mo><mo lspace="0em" rspace="thinmathspace">median</mo><mo stretchy="false">)</mo></mrow><mi>&sigma;</mi></mfrac></math>:
+	      </td>
+	      <td id="smedskew_X" class="first">
+	      </td>
+	      <td id="smedskew_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr class='discrete'>
+	      <td>
+		Skewness
+		<math xmlns='http://www.w3.org/1998/Math/MathML' display='inline'><mfrac><mrow><mover><mi>x</mi><mo>&#x000AF;</mo></mover><mo>&minus;</mo><mo lspace="0em" rspace="thinmathspace">mode</mo></mrow><mi>&sigma;</mi></mfrac></math>:
+	      </td>
+	      <td id="smodeskew_X" class="first">
+	      </td>
+	      <td id="smodeskew_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		Quartile skewness coefficient:
+	      </td>
+	      <td id="sskewq_X" class="first">
+	      </td>
+	      <td id="sskewq_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr class='rowSpacer'>
+	      <td>
+		Estimate of Mean:
+	      </td>
+	      <td id="sbmean_X" class="first">
+	      </td>
+	      <td id="sbmean_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		Estimate of Variance:
+	      </td>
+	      <td id="sbvariance_X" class="first">
+	      </td>
+	      <td id="sbvariance_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		Estimate of Standard Deviation:
+	      </td>
+	      <td id="sbstddev_X" class="first">
+	      </td>
+	      <td id="sbstddev_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		Estimate of Median:
+	      </td>
+	      <td id="sbmedian_X" class="first">
+	      </td>
+	      <td id="sbmedian_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		Estimate of Lower Quartile:
+	      </td>
+	      <td id="sblowq_X" class="first">
+	      </td>
+	      <td id="sblowq_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		Estimate of Upper Quartile:
+	      </td>
+	      <td id="sbupq_X" class="first">
+	      </td>
+	      <td id="sbupq_Y" class="second">
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		Estimate of Inter-Quartile Range:
+	      </td>
+	      <td id="sbiqrange_X" class="first">
+	      </td>
+	      <td id="sbiqrange_Y" class="second">
+	      </td>
+	    </tr>
+	  </tbody>
+	  <tbody id='quantiles'>
+	    <tr class='rowSpacer'>
+	      <td>
+		Additional quantile calculations:
+	      </td>
+	    </tr>
+	    <tr id='quantile_1'>
+	      <td class='quantiles'>
+		<button name='add_1' id='add_1' form='form' class='plus'>+</button><input type='text' id='kth_1' form='form'
+											  class='quantile'>th quantile of&nbsp;<input type='text' id='nth_1' form='form' class='quantile'>
+	      </td>
+	      <td id='quantile_1_X'>
+	      </td>
+	      <td id='quantile_1_Y' class='second'>
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		Estimate:
+	      </td>
+	      <td id='equantile_1_X'>
+	      </td>
+	      <td id='equantile_1_Y' class='second'>
+	      </td>
+	    </tr>
+	  </tbody>
+	</table>
+      </div>
+      <div id="correldiv">
+	<h3>Correlation</h3>
+	<div>
+	  <canvas id='scatter'></canvas>
+	  <div id='corrmathml'>
+	    <div>
+	      <h4>Regression Calculation</h4>
+	    <math xmlns='http://www.w3.org/1998/Math/MathML'
+		  display='inline'>
+	      <mrow>
+		<mtable columnalign="right left right left
+				     right left right left
+				     right left"
+			columnspacing="0em">
+		  <mtr>
+		    <mtd>
+		      <mi>Y</mi>
+		    </mtd>
+		    <mtd>
+		      <mo>=</mo>
+		      <mn id='gradient'>7</mn>
+		      <mi>X</mi>
+		      <mo>+</mo>
+		      <mn id='intercept'>8</mn>
+		    </mtd>
+		  </mtr>
+		  <mtr>
+		    <mtd>
+		      <mtext>Error</mtext>
+		    </mtd>
+		    <mtd>
+		      <mo>=</mo>
+		      <mn id='error'>0</mn>
+		    </mtd>
+		  </mtr>
+		</mtable>
+	      </mrow>
+	    </math>
+	    </div>
+	    <div>
+	    <button type="button" name="resetre" id="resetre"
+		    form="form">Reset regression line</button>
+	    </div>
+	    <div>
+	      <h4>Correlation and Summary Statistics</h4>
+	    <math xmlns='http://www.w3.org/1998/Math/MathML'
+		  display='inline'>
+	      <mrow>
+		<mtable columnalign="right left right left
+				     right left right left
+				     right left"
+			columnspacing="0em">
+		  <mtr>
+		    <mtd>
+		      <msub>
+			<mi>S</mi>
+			<mrow>
+			  <mi>x</mi>
+			  <mi>x</mi>
+			</mrow>
+		      </msub>
+		    </mtd>
+		    <mtd>
+		      <mo>=</mo>
+		      <mn id='Sxx'>3</mn>
+		    </mtd>
+		  </mtr>
+		  <mtr>
+		    <mtd>
+		      <msub>
+			<mi>S</mi>
+			<mrow>
+			  <mi>y</mi>
+			  <mi>y</mi>
+			</mrow>
+		      </msub>
+		    </mtd>
+		    <mtd>
+		      <mo>=</mo>
+		      <mn id='Syy'>4</mn>
+		    </mtd>
+		  </mtr>
+		  <mtr>
+		    <mtd>
+		      <msub>
+			<mi>S</mi>
+			<mrow>
+			  <mi>x</mi>
+			  <mi>y</mi>
+			</mrow>
+		      </msub>
+		    </mtd>
+		    <mtd>
+		      <mo>=</mo>
+		      <mn id='Sxy'>5</mn>
+		    </mtd>
+		  </mtr>
+		  <mtr>
+		    <mtd>
+		      <mi>r</mi><mo>=</mo><mfrac><mrow><msub><mi>S</mi> <mrow><mi>x</mi><mi>y</mi></mrow></msub></mrow><msqrt><mrow><msub><mi>S</mi> <mrow><mi>x</mi><mi>x</mi></mrow></msub><msub><mi>S</mi> <mrow><mi>y</mi><mi>y</mi></mrow></msub></mrow></msqrt></mfrac>
+		    </mtd>
+		    <mtd>
+		      <mo>=</mo>
+		      <mn id='pmcc'>6</mn>
+		    </mtd>
+		  </mtr>
+		</mtable>
+	      </mrow>
+	    </math>
+	    </div>
+	  </div>
+	</div>
+      </div>
+      <div id="helpdiv">
+	<h3>Help</h3>
+	<p>
+	  The purpose of this webpage is to provide a playground for
+	  A'level statistics.
+	</p>
+	<p>
+	  A brief overview of the tabs is as follows.
+	</p>
+	<ul>
+	  <li><span class="tabname">Data Definition.</span>  For
+	    defining or inputting the data to be studied.
+	  <li><span class="tabname">Raw Data.</span>  Once the data
+	  has been defined, it can be viewed here. It is listed both
+	  sorted and unsorted, and if two data sets of equal length
+	  are used then two data sets are combined into a list of pairs.
+	  <li><span class="tabname">Grouping.</span>  Many data
+	  analyses start with data in groups.  This tab allows one to
+	  specify the groupings.
+	  <li><span class="tabname">Frequency Table.</span>  Following
+	  the grouping, this tab displays the corresponding frequency tables.
+	  <li><span class="tabname">Stem and Leaf.</span>  This tab
+	  displays the data sets as stem and leaf diagrams.
+	  <li><span class="tabname">Histogram.</span>  This tab
+	  displays the grouped data in histograms.  It also allows for
+	  the definition of a <span class="emph">mark</span> and
+	  counts the number of data points below the mark, both actual
+	  and estimated from the frequency table.
+	  <li><span class="tabname">Boxplot.</span>  This tab displays
+	  the data as a boxplot, with outliers defined using the
+	  interquartile range definition. 
+	  <li><span class="tabname">Sample Statistics.</span>  This
+	  tab displays lots of statistics calculated from the data
+	    sets.
+	  <li><span class="tabname">Correlation.</span>  If the two
+	  data sets are of the same length, this tab shows the
+	  correlation between them.  It displays a scatter plot,
+	  calculates the correlation coefficient, and the regression
+	  line.  It is possible to modify the regression line to see
+	    how the error varies.
+	</ul>
+	<h4>Data Definition</h4>
+	<p>
+	  There are many options for defining the data set.
+	</p>
+	<ul>
+	  <li><span class="dataopt">Data type.</span> There are three
+	    types of data which modify how the program treats the data.
+	    <ul>
+	      <li><span class="dataopt">Continous.</span> The data is
+	      considered as being drawn from a continuous distribution.
+	      <li><span class="dataopt">Continous but rounded.</span>
+	      The data is considered as being drawn from a continuous
+	      distribution but a rounding function is applied
+		(currently only "to nearest integer" is available).
+		This means that the data appears discrete but is
+	      treated as having been drawn from a continuous
+		distribution.
+	      <li><span class="dataopt">Discrete.</span> The data is
+	      considered as being drawn from a discrete distribution.
+	    </ul>
+	  <li><span class="dataopt">Enable.</span> It is possible to
+	  work with either one or two data sets.  Checking this box
+	    enables the second data set.
+	  <li><span class="dataopt">Auto.</span> The data can be
+	    automatically generated or entered directly.  If this is
+	    checked, the data is automatically generated.  If not, it
+	    can be entered directly in
+	    the <span class="dataopt">Data</span> textarea.  The data
+	    points can be separated by commas, semi-colons, or spaces
+	    (including tabs and newlines).
+	  <li><span class="dataopt">Distribution.</span> Depending on
+	  the data type, various standard distributions are
+	  available.  Each requires some parameters.  The available
+	    distributions are:
+	    <ul>
+	      <li>Continuous distributions.  All are specified by
+	      giving the mean and standard deviation.  The Exponential
+	      and Log-Normal distributions are good sources of skewed data. 
+		<ul>
+		  <li><span class="dataopt">Gaussian (Normal)</span>
+		  <li><span class="dataopt">(Translated)
+		      Exponential</span>
+		  <li><span class="dataopt">Uniform</span>
+		  <li><span class="dataopt">Log-Normal</span>
+		</ul>
+	      <li>Discrete distributions.
+		<ul>
+		  <li><span class="dataopt">Binomial</span>
+		  <li><span class="dataopt">Poisson</span>
+		  <li><span class="dataopt">Uniform</span>
+		</ul>
+	    </ul>
+	  <li><span class="dataopt">Number of points.</span> This is
+	  the number of points to generate.  If both data sets have
+	    the same number of points, regression analysis is enabled.
+	  <li><span class="dataopt">Extra data points.</span> It is
+	    possible to add additional data points to the generated
+	      data.
+	  <li><span class="dataopt">Generate data.</span>
+		Most of the time, the data should update itself when
+		the options are changed.  Sometimes it might be
+		necessary or desirable to manually generate it.
+	  <li><span class="dataopt">Generate quantiles.</span> Rather
+	  than generate the second data set randomly (from the given
+	  distribution), it is possible to generate the quantiles
+	  corresponding to the number of data points in the first data
+	  sample.  This can be used as a simple test for whether or
+	  not the first data set fits the given distribution: plotting
+	  a scatter plot of the data sets and looking at the
+	  correlation coefficient provides evidence to this (in these
+	  circumstances, the scatter plot is known as
+	    a <span class="dataopt">QQ-plot</span>.
+	  <li><span class="dataopt">Force correlation.</span>  If this
+	  checkbox is ticked, the program attempts to coerce the
+	  second data set to be correlated to the first with the given
+	  <span class="dataopt">Desired correlation</span>.  The final
+	  correlation may not be precisely equal to the desired
+	  correlation.
+	  <li><span class="dataopt">Apply coding.</span>  If this
+	  checkbox is ticked, the second data set is generated by
+	  applying the given coding to the first data set.
+	</ul>
+	<h4>Grouping</h4>
+	<p>
+	  The <span class="tabname">Frequency
+	  Table</span>, <span class="tabname">Histogram</span>, and
+	  some of the <span class="tabname">Sample Statistics</span>
+	  depend on putting the data into groups.  This tab allows one
+	  to define those groups.
+	</p>
+	<p>
+	  There are two ways to define the groups.
+	  If <span class="dataopt">Even class intervals</span> is
+	  checked then the groups are of equal widths and so are
+	  specified by the width and the initial offset from zero.
+	  If it is not checked, one must specify the boundaries
+	  individually.
+	</p>
+	<p>
+	  The groups are assumed to be open at the top end.  That is,
+	  if <math xmlns='http://www.w3.org/1998/Math/MathML'
+			  display='inline'><mi>a</mi></math> and <math xmlns='http://www.w3.org/1998/Math/MathML'
+			  display='inline'><mi>b</mi></math> are two
+	  boundaries, the group
+	  is <math xmlns='http://www.w3.org/1998/Math/MathML' display='inline'><mi>a</mi><mo>&le;</mo><mi>x</mi><mo>&lt;</mo><mi>b</mi></math>.
+	  </p>
+	<h4>Histogram</h4>
+	<p>
+	  The interactivity in
+	  the <span class="tabname">Histogram</span> tab is the
+	  ability to move the red marker.  The purpose of this is to
+	  show the effect of interpolation.  After the mark is set,
+	  the program calculates how many data points are below the
+	  mark together with an estimate of how many data points there
+	  are using interpolation on the groups.  Thus it is possible
+	  to compare the grouped estimate with the actual figure.
+	</p>
+	<h4>Sample Statistics</h4>
+	<p>
+	  In this tab, an array of statistics is computed from the
+	  data sample(s).  Hovering over a title reveals a brief
+	  description of the statistics.  Where a statistic contains
+	  the word "Estimate", it is based on the grouped data.  Extra
+	  quantiles can be calculated using the input boxes at the
+	  bottom.  For example, to work out the 70th percentile, enter
+	  "70" and "100" in the boxes so that it reads
+	  "70th quantile of 100".
+	</p>
+	<p>
+	  <h4>Correlation</h4>
+	<p>
+	  This tab is only displayed if there are two data sets of the
+	  same length.  It displays a scatter plot together with the
+	  relevant statistics for correlation and regression analysis.
+	</p>
+	<p>
+	  It is possible to adjust the line to demonstrate
+	  that the regression line is the best fit.  Clicking and
+	  dragging on the
+	  scatter plot will adjust the line to pass through the mouse
+	  or touch
+	  point.  If the mouse is near the centre of the scatter plot
+	  then the y-intercept is adjusted, if the mouse is near the
+	  edges then the gradient is adjusted.
+	  Clicking <span class="dataopt">Reset regression line</span>
+	  resets the line back to the regression line.
+	</p>
       </div>
     </div>
-    </div>
-    <script type="text/javascript">
-      setTimeout(init(),500);
-    </script>
-  </body>
+  </div>
+</body>
 </html>
