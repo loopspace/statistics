@@ -227,7 +227,11 @@ function getValues (redo) {
     values.number_Y = parseInt(values.number_Y,10);
 
     if (values.correlate || values.coding || values.quantiles) {
-	values.number_Y = values.number_X;
+	if (values.auto_X) {
+	    values.number_Y = values.number_X;
+	} else {
+	    values.number_Y = values.adata_X.length;
+	}
     }
     if (values.correlate || values.coding) {
 	values.distribution_Y = values.distribution_X;
@@ -343,6 +347,7 @@ function getValues (redo) {
     if (values.even) {
 	lv = Math.floor((getMinimum(data_X,data_Y) - values.classb)/values.classw);
 	hv = Math.ceil((getMaximum(data_X,data_Y) - values.classb)/values.classw)+1;
+
 	for (var i=0; i< hv-lv; i++) {
 	    if (values.type == 1 && values.classw == 1) {
 		lbls = ((i + lv)*values.classw + values.classb).toString();
