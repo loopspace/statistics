@@ -298,6 +298,16 @@ Data.prototype.variance = function() {
     return this.stats.variance;
 }
 
+Data.prototype.sample_variance = function() {
+    if (this.stats.sample_variance) {
+	return this.stats.sample_variance;
+    }
+    var s = this.variance();
+    s *= this.data.length/(this.data.length-1);
+    this.stats.sample_variance = s;
+    return this.stats.sample_variance;
+}
+
 Data.prototype.write_variance = function(id) {
     if (!this.active) return;
     this.set_field(id,Math.round10(this.variance(),precision));
@@ -310,6 +320,15 @@ Data.prototype.stddev = function() {
     var v = this.variance();
     this.stats.stddev = Math.sqrt(v);
     return this.stats.stddev;
+}
+
+Data.prototype.sample_stddev = function() {
+    if (this.stats.sample_stddev) {
+	return this.stats.sample_stddev;
+    }
+    var v = this.sample_variance();
+    this.stats.sample_stddev = Math.sqrt(v);
+    return this.stats.sample_stddev;
 }
 
 Data.prototype.write_stddev = function(id) {
@@ -682,6 +701,44 @@ Data.prototype.write_mode = function(id) {
     this.set_field(id,this.mode());
 }
 
+Data.prototype.lilliefors = function() {
+    if (this.stats.lilliefors)
+	return this.stats.lilliefors;
+    var m = this.mean();
+    var s = this.sample_stddev();
+    var n = this.data.length;
+    var pd, d;
+    pd = 0;
+    d = 0;
+    s *= Math.sqrt(2);
+    for (var i = 0; i < n; i++) {
+	d = Math.max(d, Math.abs( (i+1)/(n+1) - pd ));
+	pd = (1 + erf((this.sdata[i] - m)/s))/2;
+	d = Math.max(d, Math.abs( (i+1)/(n+1) - pd ));
+    }
+    var b2 = 0.08861783849346;
+    var b1 = 1.30748185078790;
+    var b0 = 0.37872256037043;
+    var A = ( - (b1 + n) + Math.sqrt( Math.pow(b1 + n,2) - 4 * b2 * ( b0 - Math.pow(d,-2) ) ) )/( 2*b2 );
+    var p = -.37782822932809
+	+ 1.67819837908004 * A
+	- 3.02959249450445 * Math.pow(A,2)
+	+ 2.80015798142101 * Math.pow(A,3)
+	- 1.39874347510845 * Math.pow(A,4)
+	+ 0.40466213484419 * Math.pow(A,5)
+	- 0.06353440854207 * Math.pow(A,6)
+	+ 0.00287462087623 * Math.pow(A,7)
+	+ 0.00069650013110 * Math.pow(A,8)
+	- 0.00011872227037 * Math.pow(A,9)
+	+ 0.00000575586834 * Math.pow(A,10);
+    this.stats.lilliefors = d;
+    return this.stats.lilliefors;
+}
+
+Data.prototype.write_lilliefors = function(id) {
+    if (!this.active) return;
+    this.set_field(id,Math.round10(this.lilliefors(),-3));
+}
 
 
 Data.prototype.draw_histogram = function(ctx,pos,scale,hbin,bins) {

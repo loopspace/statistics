@@ -221,6 +221,7 @@ canvas {
     text-align: left;
     opacity: 0;
     right: 10px;
+    bottom: 10px;
     transition: opacity 1s ease-in-out;
     transition-delay: .5s;
 }

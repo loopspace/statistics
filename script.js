@@ -416,6 +416,7 @@ function getValues (redo) {
     data_X.write_skewmedian('smedskew');
     data_X.write_skewmode('smodeskew');
     data_X.write_skewquartile('sskewq');
+    data_X.write_lilliefors('lilliefors');
     data_X.write_binlowerquartile('sblowq',bins);
     data_X.write_binmedian('sbmedian',bins);
     data_X.write_binmean('sbmean',bins);
@@ -444,6 +445,7 @@ function getValues (redo) {
     data_Y.write_skewmedian('smedskew');
     data_Y.write_skewmode('smodeskew');
     data_Y.write_skewquartile('sskewq');
+    data_Y.write_lilliefors('lilliefors');
     data_Y.write_binlowerquartile('sblowq',bins);
     data_Y.write_binmedian('sbmedian',bins);
     data_Y.write_binmean('sbmean',bins);
